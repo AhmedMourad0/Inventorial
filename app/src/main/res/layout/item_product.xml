@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="4dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginStart="12dp"
+    android:layout_marginTop="6dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    app:cardCornerRadius="1dp"
+    app:cardElevation="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:orientation="horizontal"
+        android:paddingEnd="16dp"
+        android:paddingStart="16dp">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/product_image"
+            android:layout_width="32dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginBottom="14dp"
+            android:layout_marginTop="14dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/product_image"
+            android:scaleType="centerCrop" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingBottom="12dp"
+            android:paddingEnd="8dp"
+            android:paddingStart="12dp"
+            android:paddingTop="12dp">
+
+            <TextView
+                android:id="@+id/product_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:scrollHorizontally="true"
+                android:textColor="@color/colorTextPrimary"
+                android:textSize="16sp"
+                tools:text="Product name" />
+
+            <TextView
+                android:id="@+id/product_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                tools:text="$500" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/product_increment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:contentDescription="@string/increment_product_quantity"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:paddingBottom="@dimen/product_arrow_padding_bottom"
+                android:paddingEnd="@dimen/product_arrow_padding_end"
+                android:paddingStart="@dimen/product_arrow_padding_start"
+                android:paddingTop="@dimen/product_arrow_padding_top"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_up" />
+
+            <TextView
+                android:id="@+id/product_quantity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:fontFamily="sans-serif-light"
+                android:textSize="16sp"
+                tools:text="300" />
+
+            <ImageButton
+                android:id="@+id/product_decrement"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:contentDescription="@string/decrement_product_quantity"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:paddingBottom="@dimen/product_arrow_padding_bottom"
+                android:paddingEnd="@dimen/product_arrow_padding_end"
+                android:paddingStart="@dimen/product_arrow_padding_start"
+                android:paddingTop="@dimen/product_arrow_padding_top"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_down" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>

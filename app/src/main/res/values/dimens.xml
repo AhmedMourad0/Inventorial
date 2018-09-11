@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="speed_dial_margin">16dp</dimen>
+
+    <dimen name="space_text_size">18sp</dimen>
+
+    <dimen name="add_product_elements_spacing">24dp</dimen>
+    <dimen name="add_product_save_side_margins">32dp</dimen>
+
+    <dimen name="details_section_label_margin_bottom">6dp</dimen>
+    <dimen name="details_section_label_margin_start">8dp</dimen>
+    <dimen name="details_section_label_margin_top">8dp</dimen>
+
+    <dimen name="details_card_corner_radius">1dp</dimen>
+    <dimen name="details_card_elevation">2dp</dimen>
+    <dimen name="details_card_margin_sides">8dp</dimen>
+
+    <dimen name="details_section_padding_top">28dp</dimen>
+    <dimen name="details_section_padding_bottom">20dp</dimen>
+
+    <dimen name="details_element_margin_bottom">12dp</dimen>
+    <dimen name="details_element_drawable_padding">22dp</dimen>
+    <dimen name="details_element_padding_start">22dp</dimen>
+    <dimen name="details_element_text_size">15sp</dimen>
+    <dimen name="details_element_padding_end">8dp</dimen>
+
+    <dimen name="product_arrow_padding_bottom">12dp</dimen>
+    <dimen name="product_arrow_padding_end">16dp</dimen>
+    <dimen name="product_arrow_padding_start">16dp</dimen>
+    <dimen name="product_arrow_padding_top">12dp</dimen>
+
+</resources>
