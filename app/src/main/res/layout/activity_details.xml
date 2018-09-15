@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.DetailsActivity">
+    tools:context=".view.activities.DetailsActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -12,9 +12,9 @@
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/details_collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="exitUntilCollapsed|scroll">
 
@@ -26,10 +26,9 @@
                 <ImageView
                     android:id="@+id/details_product_image"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/details_product_image_height"
                     android:adjustViewBounds="true"
                     android:contentDescription="@string/product_image"
-                    android:fitsSystemWindows="true"
                     android:scaleType="centerCrop"
                     android:src="@drawable/placeholder" />
 
@@ -53,176 +52,203 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v4.widget.NestedScrollView
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingTop="8dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <LinearLayout
+        <me.zhanghai.android.materialprogressbar.MaterialProgressBar
+            android:id="@+id/details_progressbar"
+            style="@style/Widget.MaterialProgressBar.ProgressBar.Horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="3dp"
+            android:layout_gravity="top"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:mpb_indeterminateTint="#2196F3"
+            app:mpb_progressStyle="horizontal"
+            app:mpb_useIntrinsicPadding="false"
+            tools:visibility="visible" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/details_section_label_margin_bottom"
-                android:layout_marginStart="@dimen/details_section_label_margin_start"
-                android:layout_marginTop="@dimen/details_section_label_margin_top"
-                android:fontFamily="sans-serif"
-                android:text="@string/product_details"
-                android:textColor="@color/colorSectionLabel" />
+        <android.support.v4.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingTop="8dp">
 
-            <android.support.v7.widget.CardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/details_card_margin_sides"
-                android:layout_marginStart="@dimen/details_card_margin_sides"
-                android:layout_marginBottom="20dp"
-                app:backgroundTint="@android:color/white"
-                app:cardCornerRadius="@dimen/details_card_corner_radius"
-                app:cardElevation="@dimen/details_card_elevation">
+                android:orientation="vertical">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:paddingBottom="@dimen/details_section_padding_bottom"
-                    android:paddingTop="@dimen/details_section_padding_top">
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/details_section_label_margin_bottom"
+                    android:layout_marginStart="@dimen/details_section_label_margin_start"
+                    android:layout_marginTop="@dimen/details_section_label_margin_top"
+                    android:fontFamily="sans-serif"
+                    android:text="@string/product_details"
+                    android:textColor="@color/colorSectionLabel" />
 
-                    <TextView
-                        android:id="@+id/details_product_price"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginBottom="@dimen/details_element_margin_bottom"
-                        android:drawablePadding="@dimen/details_element_drawable_padding"
-                        android:drawableStart="@drawable/ic_price"
-                        android:fontFamily="sans-serif"
-                        android:gravity="center_vertical"
-                        android:lineSpacingMultiplier="1.1"
-                        android:paddingEnd="@dimen/details_element_padding_end"
-                        android:paddingStart="@dimen/details_element_padding_start"
-                        android:text="@string/not_available"
-                        android:textSize="@dimen/details_element_text_size" />
+                <android.support.v7.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginEnd="@dimen/details_card_margin_sides"
+                    android:layout_marginStart="@dimen/details_card_margin_sides"
+                    app:backgroundTint="@android:color/white"
+                    app:cardCornerRadius="@dimen/details_card_corner_radius"
+                    app:cardElevation="@dimen/details_card_elevation">
 
-                    <include
-                        layout="@layout/content_details_divider"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:paddingBottom="20dp"
+                        android:paddingTop="@dimen/details_section_padding_top">
 
-                    <TextView
-                        android:id="@+id/details_product_quantity"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginBottom="@dimen/details_element_margin_bottom"
-                        android:layout_marginTop="12dp"
-                        android:drawablePadding="@dimen/details_element_drawable_padding"
-                        android:drawableStart="@drawable/ic_quantity"
-                        android:fontFamily="sans-serif"
-                        android:gravity="center_vertical"
-                        android:lineSpacingMultiplier="1.1"
-                        android:paddingEnd="@dimen/details_element_padding_end"
-                        android:paddingStart="@dimen/details_element_padding_start"
-                        android:text="@string/not_available"
-                        android:textSize="@dimen/details_element_text_size" />
+                        <TextView
+                            android:id="@+id/details_product_price"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginBottom="@dimen/details_element_margin_bottom"
+                            android:drawablePadding="@dimen/details_element_drawable_padding"
+                            android:drawableStart="@drawable/ic_price"
+                            android:fontFamily="sans-serif"
+                            android:gravity="center_vertical"
+                            android:lineSpacingMultiplier="1.1"
+                            android:paddingEnd="@dimen/details_element_padding_end"
+                            android:paddingStart="@dimen/details_element_padding_start"
+                            android:text="@string/not_available"
+                            android:textSize="@dimen/details_element_text_size" />
 
-                </LinearLayout>
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/divider_height"
+                            android:layout_marginBottom="@dimen/divider_margin_bottom"
+                            android:layout_marginEnd="@dimen/divider_margin_end"
+                            android:layout_marginStart="@dimen/divider_margin_start"
+                            android:layout_marginTop="@dimen/divider_margin_top"
+                            android:background="@color/colorDivider" />
 
-            </android.support.v7.widget.CardView>
+                        <TextView
+                            android:id="@+id/details_product_quantity"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginBottom="8dp"
+                            android:layout_marginTop="12dp"
+                            android:drawablePadding="@dimen/details_element_drawable_padding"
+                            android:drawableStart="@drawable/ic_quantity"
+                            android:fontFamily="sans-serif"
+                            android:gravity="center_vertical"
+                            android:lineSpacingMultiplier="1.1"
+                            android:paddingEnd="@dimen/details_element_padding_end"
+                            android:paddingStart="@dimen/details_element_padding_start"
+                            android:text="@string/not_available"
+                            android:textSize="@dimen/details_element_text_size" />
 
-            <TextView
-                android:id="@+id/details_supplier_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/details_section_label_margin_bottom"
-                android:layout_marginStart="@dimen/details_section_label_margin_start"
-                android:fontFamily="sans-serif"
-                android:text="@string/supplier_details"
-                android:textColor="@color/colorSectionLabel" />
+                    </LinearLayout>
 
-            <android.support.v7.widget.CardView
-                android:id="@+id/details_supplier_card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="60dp"
-                android:layout_marginEnd="@dimen/details_card_margin_sides"
-                android:layout_marginStart="@dimen/details_card_margin_sides"
-                app:backgroundTint="@android:color/white"
-                app:cardCornerRadius="@dimen/details_card_corner_radius"
-                app:cardElevation="@dimen/details_card_elevation">
+                </android.support.v7.widget.CardView>
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/details_supplier_label"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:paddingBottom="@dimen/details_section_padding_bottom"
-                    android:paddingTop="@dimen/details_section_padding_top">
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/details_section_label_margin_bottom"
+                    android:layout_marginStart="@dimen/details_section_label_margin_start"
+                    android:fontFamily="sans-serif"
+                    android:text="@string/supplier_details"
+                    android:textColor="@color/colorSectionLabel" />
 
-                    <TextView
-                        android:id="@+id/details_supplier_name"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginBottom="@dimen/details_element_margin_bottom"
-                        android:drawablePadding="@dimen/details_element_drawable_padding"
-                        android:drawableStart="@drawable/ic_factory"
-                        android:fontFamily="sans-serif"
-                        android:gravity="center_vertical"
-                        android:lineSpacingMultiplier="1.1"
-                        android:paddingEnd="@dimen/details_element_padding_end"
-                        android:paddingStart="@dimen/details_element_padding_start"
-                        android:text="@string/not_available"
-                        android:textSize="@dimen/details_element_text_size" />
+                <android.support.v7.widget.CardView
+                    android:id="@+id/details_supplier_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="60dp"
+                    android:layout_marginEnd="@dimen/details_card_margin_sides"
+                    android:layout_marginStart="@dimen/details_card_margin_sides"
+                    app:backgroundTint="@android:color/white"
+                    app:cardCornerRadius="@dimen/details_card_corner_radius"
+                    app:cardElevation="@dimen/details_card_elevation">
 
-                    <include
-                        layout="@layout/content_details_divider"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:paddingTop="@dimen/details_section_padding_top">
 
-                    <TextView
-                        android:id="@+id/details_supplier_phone_number"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginTop="12dp"
-                        android:drawablePadding="@dimen/details_element_drawable_padding"
-                        android:drawableStart="@drawable/ic_phone"
-                        android:fontFamily="sans-serif"
-                        android:gravity="center_vertical"
-                        android:lineSpacingMultiplier="1.2"
-                        android:paddingEnd="@dimen/details_element_padding_end"
-                        android:paddingStart="@dimen/details_element_padding_start"
-                        android:text="@string/not_available"
-                        android:textSize="@dimen/details_element_text_size" />
+                        <TextView
+                            android:id="@+id/details_supplier_name"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginBottom="@dimen/details_element_margin_bottom"
+                            android:drawablePadding="@dimen/details_element_drawable_padding"
+                            android:drawableStart="@drawable/ic_factory"
+                            android:fontFamily="sans-serif"
+                            android:gravity="center_vertical"
+                            android:lineSpacingMultiplier="1.1"
+                            android:paddingEnd="@dimen/details_element_padding_end"
+                            android:paddingStart="@dimen/details_element_padding_start"
+                            android:text="@string/not_available"
+                            android:textSize="@dimen/details_element_text_size" />
 
-                    <View
-                        android:id="@+id/details_supplier_products_divider"
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/colorDivider" />
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/divider_height"
+                            android:layout_marginBottom="@dimen/divider_margin_bottom"
+                            android:layout_marginEnd="@dimen/divider_margin_end"
+                            android:layout_marginStart="@dimen/divider_margin_start"
+                            android:layout_marginTop="@dimen/divider_margin_top"
+                            android:background="@color/colorDivider" />
 
-                    <Button
-                        android:id="@+id/details_supplier_products"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:background="?attr/selectableItemBackground"
-                        android:fontFamily="sans-serif"
-                        android:gravity="center"
-                        android:text="@string/view_products"
-                        android:textColor="@color/colorSectionLabel"
-                        android:textSize="14sp" />
+                        <TextView
+                            android:id="@+id/details_supplier_phone_number"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginBottom="20dp"
+                            android:layout_marginTop="12dp"
+                            android:drawablePadding="@dimen/details_element_drawable_padding"
+                            android:drawableStart="@drawable/ic_phone"
+                            android:fontFamily="sans-serif"
+                            android:gravity="center_vertical"
+                            android:lineSpacingMultiplier="1.2"
+                            android:paddingEnd="@dimen/details_element_padding_end"
+                            android:paddingStart="@dimen/details_element_padding_start"
+                            android:text="@string/not_available"
+                            android:textSize="@dimen/details_element_text_size" />
 
-                </LinearLayout>
+                        <View
+                            android:id="@+id/details_supplier_products_divider"
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/colorDivider" />
 
-            </android.support.v7.widget.CardView>
+                        <Button
+                            android:id="@+id/details_supplier_products"
+                            android:layout_width="match_parent"
+                            android:layout_height="52dp"
+                            android:background="?attr/selectableItemBackground"
+                            android:fontFamily="sans-serif"
+                            android:gravity="center"
+                            android:text="@string/view_products"
+                            android:textColor="@color/colorSectionLabel"
+                            android:textSize="14sp" />
 
-        </LinearLayout>
+                    </LinearLayout>
 
-    </android.support.v4.widget.NestedScrollView>
+                </android.support.v7.widget.CardView>
+
+            </LinearLayout>
+
+        </android.support.v4.widget.NestedScrollView>
+
+    </FrameLayout>
 
     <com.luseen.spacenavigation.SpaceNavigationView
         android:id="@+id/details_space"

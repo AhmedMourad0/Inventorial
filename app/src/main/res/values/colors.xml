@@ -3,6 +3,9 @@
     <color name="colorPrimary">#FFFFFF</color>
     <color name="colorPrimaryDark">#BDBDBD</color>
     <color name="colorAccent">#673AB7</color>
+    <color name="colorSpaceBackground">#546E7A</color>
+    <color name="colorSpaceCenter">#80CBC4</color>
+    <color name="colorSnackbarAction">#9575cd</color>
     <color name="colorTextPrimary">#616161</color>
     <color name="colorDivider">#cfcfd8dc</color>
     <color name="colorSectionLabel">#c8616161</color>

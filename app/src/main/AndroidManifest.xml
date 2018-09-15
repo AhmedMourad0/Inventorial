@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="inc.ahmedmourad.inventorial">
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <permission
         android:name="inc.ahmedmourad.inventorial.ACCESS_INVENTORIAL_PROVIDER"
         android:label="Access Inventorial Content Provider"
@@ -17,14 +21,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".view.MainActivity">
+        <activity android:name=".view.activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <provider
             android:name=".model.database.InventorialProvider"
             android:authorities="@string/content_authority"
@@ -32,24 +35,27 @@
             android:exported="false"
             android:permission="inc.ahmedmourad.inventorial.ACCESS_INVENTORIAL_PROVIDER"
             android:syncable="false" />
-
         <activity
-            android:name=".view.AddProductActivity"
+            android:name=".view.activities.AddProductActivity"
             android:label="@string/add_new_product"
-            android:parentActivityName=".view.MainActivity">
+            android:parentActivityName=".view.activities.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="inc.ahmedmourad.inventorial.view.MainActivity" />
+                android:value="inc.ahmedmourad.inventorial.view.activities.MainActivity" />
         </activity>
         <activity
-            android:name=".view.DetailsActivity"
+            android:name=".view.activities.DetailsActivity"
             android:label="@string/product_details"
-            android:parentActivityName=".view.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:parentActivityName=".view.activities.MainActivity"
+            android:theme="@style/BaseAppTheme.CollapsingToolbar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="inc.ahmedmourad.inventorial.view.MainActivity" />
+                android:value="inc.ahmedmourad.inventorial.view.activities.MainActivity" />
         </activity>
+
+        <service
+            android:name=".services.DatabaseService"
+            android:exported="false" />
     </application>
 
 </manifest>

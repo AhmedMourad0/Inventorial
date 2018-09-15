@@ -3,6 +3,7 @@ package inc.ahmedmourad.inventorial.model.database;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 
 public final class InventorialContract {
 
@@ -49,7 +50,6 @@ public final class InventorialContract {
 		public static final String COLUMN_NAME = "p_name";
 		public static final String COLUMN_PRICE = "price";
 		public static final String COLUMN_QUANTITY = "quantity";
-		public static final String COLUMN_IMAGE = "image";
 		public static final String COLUMN_SUPPLIER_ID = "supplier_id";
 
 		public static final String PATH_PAIRS = "pairs";
@@ -75,6 +75,16 @@ public final class InventorialContract {
 
 		public static long getProductIdFromPairUri(final Uri uri) {
 			return Long.parseLong(uri.getLastPathSegment());
+		}
+
+		// content://inc.ahmedmourad.inventorial/products/pairs/*
+		public static Uri buildPairUriWithProductName(@NonNull final String productName) {
+			return CONTENT_URI.buildUpon().appendPath(PATH_PAIRS).appendPath(productName).build();
+		}
+
+		@NonNull
+		public static String getProductNameFromPairUri(final Uri uri) {
+			return uri.getLastPathSegment();
 		}
 
 		// content://inc.ahmedmourad.inventorial/products/pairs/supplier_id/#

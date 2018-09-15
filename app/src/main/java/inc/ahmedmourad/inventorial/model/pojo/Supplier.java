@@ -33,7 +33,6 @@ public class Supplier {
 		return supplier;
 	}
 
-	@NonNull
 	public String getName() {
 		return name;
 	}
@@ -43,7 +42,6 @@ public class Supplier {
 		this.name = name;
 	}
 
-	@NonNull
 	public String getPhoneNumber() {
 		return phoneNumber;
 	}

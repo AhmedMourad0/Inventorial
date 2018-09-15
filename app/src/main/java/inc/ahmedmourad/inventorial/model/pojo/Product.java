@@ -6,8 +6,6 @@ import android.support.annotation.NonNull;
 
 import org.parceler.Parcel;
 
-import java.util.Arrays;
-
 import inc.ahmedmourad.inventorial.model.database.InventorialContract.ProductsEntry;
 
 @Parcel(Parcel.Serialization.BEAN)
@@ -18,17 +16,14 @@ public class Product {
 	private double price = 0.0;
 	private double quantity = 0.0;
 
-	private byte[] image = null;
-
 	private long id = -1;
 
 	@NonNull
-	public static Product of(@NonNull final String name, final double price, final double quantity, @NonNull final byte[] image) {
+	public static Product of(@NonNull final String name, final double price, final double quantity) {
 		final Product product = new Product();
 		product.setName(name);
 		product.setPrice(price);
 		product.setQuantity(quantity);
-		product.setImage(image);
 		return product;
 	}
 
@@ -39,7 +34,6 @@ public class Product {
 		product.setName(cursor.getString(cursor.getColumnIndex(ProductsEntry.COLUMN_NAME)));
 		product.setPrice(cursor.getDouble(cursor.getColumnIndex(ProductsEntry.COLUMN_PRICE)));
 		product.setQuantity(cursor.getDouble(cursor.getColumnIndex(ProductsEntry.COLUMN_QUANTITY)));
-		product.setImage(cursor.getBlob(cursor.getColumnIndex(ProductsEntry.COLUMN_IMAGE)));
 		return product;
 	}
 
@@ -70,16 +64,6 @@ public class Product {
 		this.quantity = quantity;
 	}
 
-	@NonNull
-	public byte[] getImage() {
-		return image;
-	}
-
-	@SuppressWarnings("WeakerAccess")
-	public void setImage(@NonNull final byte[] image) {
-		this.image = image;
-	}
-
 	public long getId() {
 		return id;
 	}
@@ -102,7 +86,6 @@ public class Product {
 		contentValues.put(ProductsEntry.COLUMN_NAME, getName());
 		contentValues.put(ProductsEntry.COLUMN_PRICE, getPrice() > 0 ? getPrice() : 0);
 		contentValues.put(ProductsEntry.COLUMN_QUANTITY, getQuantity() > 0 ? getQuantity() : 0);
-		contentValues.put(ProductsEntry.COLUMN_IMAGE, getImage());
 		contentValues.put(ProductsEntry.COLUMN_SUPPLIER_ID, supplierId);
 
 		return contentValues;
@@ -122,8 +105,7 @@ public class Product {
 		return Double.compare(product.getPrice(), getPrice()) == 0 &&
 				Double.compare(product.getQuantity(), getQuantity()) == 0 &&
 				getId() == product.getId() &&
-				getName().equals(product.getName()) &&
-				Arrays.equals(getImage(), product.getImage());
+				getName().equals(product.getName());
 	}
 
 	@Override
@@ -134,7 +116,6 @@ public class Product {
 		result = result * 31 + (int) getPrice();
 		result = result * 31 + (int) getQuantity();
 		result = result * 31 + (int) getId();
-		result = 31 * result + Arrays.hashCode(getImage());
 
 		return result;
 	}
@@ -143,7 +124,7 @@ public class Product {
 	public String toString() {
 		return "Product{" +
 				"id=" + getId() +
-				"name='" + getName() + '\'' +
+				", name='" + getName() + '\'' +
 				", price=" + getPrice() +
 				", quantity=" + getQuantity() +
 				'}';

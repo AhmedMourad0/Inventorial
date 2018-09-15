@@ -43,10 +43,9 @@ class InventorialDbHelper extends SQLiteOpenHelper {
 
 		final String SQL_CREATE_PRODUCTS_TABLE = "CREATE TABLE IF NOT EXISTS " + ProductsEntry.TABLE_NAME + " (" +
 				ProductsEntry.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-				ProductsEntry.COLUMN_NAME + " TEXT NOT NULL, " +
+				ProductsEntry.COLUMN_NAME + " TEXT NOT NULL UNIQUE, " +
 				ProductsEntry.COLUMN_PRICE + " REAL NOT NULL, " +
 				ProductsEntry.COLUMN_QUANTITY + " REAL NOT NULL, " +
-				ProductsEntry.COLUMN_IMAGE + " BLOB NOT NULL, " +
 				ProductsEntry.COLUMN_SUPPLIER_ID + " INTEGER NOT NULL, " +
 				" FOREIGN KEY (" + ProductsEntry.COLUMN_SUPPLIER_ID + ") REFERENCES " +
 				SuppliersEntry.TABLE_NAME + " (" + SuppliersEntry.COLUMN_ID + ") ON DELETE CASCADE" +

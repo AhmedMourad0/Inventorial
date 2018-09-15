@@ -5,88 +5,25 @@ import android.content.DialogInterface;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
-import android.support.design.widget.TextInputEditText;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.view.ContextThemeWrapper;
-import android.telephony.PhoneNumberFormattingTextWatcher;
-import android.text.Editable;
 import android.view.Gravity;
-import android.view.View;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.NumberPicker;
 
 import inc.ahmedmourad.inventorial.R;
-import inc.ahmedmourad.inventorial.defaults.DefaultTextWatcher;
-import inc.ahmedmourad.inventorial.model.database.InventorialDatabase;
-import inc.ahmedmourad.inventorial.model.pojo.ProductSupplierPair;
-import inc.ahmedmourad.inventorial.model.pojo.Supplier;
+
+import static android.content.DialogInterface.BUTTON_POSITIVE;
 
 public final class DialogUtils {
 
-	public static void showNewSupplierDialog(@NonNull final Context context) {
-
-		final View view = View.inflate(context, R.layout.dialog_new_supplier, null);
-
-		final TextInputEditText nameEditText = view.findViewById(R.id.new_supplier_name);
-		final TextInputEditText phoneNumberEditText = view.findViewById(R.id.new_supplier_phone_number);
-
-		final AlertDialog dialog = new AlertDialog.Builder(context)
-				.setNegativeButton(R.string.cancel, (d, which) -> d.dismiss())
-				.setTitle(R.string.new_supplier)
-				.setView(view)
-				.setPositiveButton(R.string.add, (d, which) -> insertSupplier(context, nameEditText, phoneNumberEditText))
-				.create();
-
-		dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-				.setTextColor(ContextCompat.getColor(context, R.color.colorAccent))
-		);
-
-		nameEditText.addTextChangedListener(new DefaultTextWatcher() {
-			@Override
-			public void afterTextChanged(Editable s) {
-				validateSupplierInputs(dialog, nameEditText, phoneNumberEditText);
-			}
-		});
-
-		phoneNumberEditText.addTextChangedListener(new PhoneNumberFormattingTextWatcher() {
-			@Override
-			public void afterTextChanged(Editable s) {
-				super.afterTextChanged(s);
-				validateSupplierInputs(dialog, nameEditText, phoneNumberEditText);
-			}
-		});
-
-		dialog.show();
-
-		validateSupplierInputs(dialog, nameEditText, phoneNumberEditText);
-	}
-
-	private static void validateSupplierInputs(@NonNull final AlertDialog dialog, @NonNull final EditText nameEditText, @NonNull final EditText phoneNumberEditText) {
-		dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(areSupplierInputsValid(nameEditText, phoneNumberEditText));
-	}
-
-	private static boolean areSupplierInputsValid(@NonNull final EditText nameEditText, @NonNull final EditText phoneNumberEditText) {
-		return nameEditText.getText().toString().trim().length() > 0 &&
-				phoneNumberEditText.getText().toString().trim().length() > 0;
-	}
-
-	private static void insertSupplier(@NonNull final Context context, @NonNull final EditText nameEditText, @NonNull final EditText phoneNumberEditText) {
-
-		final Supplier supplier = Supplier.of(nameEditText.getText().toString().trim(),
-				phoneNumberEditText.getText().toString().trim()
-		);
-
-		InventorialDatabase.getInstance().insertSupplier(context, supplier);
-	}
-
 	public static void showDeleteProductConfirmationDialog(@NonNull final Context context,
-	                                                       @NonNull final ProductSupplierPair pair,
+	                                                       @NonNull final String productName,
 	                                                       @NonNull final DialogInterface.OnClickListener positiveClickListener) {
 
 		final String msg = StringUtils.fromHtml(context.getString(R.string.dialog_message_delete_product,
-				pair.getProduct().getName(), pair.getSupplier().getName()
+				productName
 		));
 
 		final AlertDialog dialog = new AlertDialog.Builder(context)
@@ -96,7 +33,7 @@ public final class DialogUtils {
 				.setPositiveButton(R.string.delete, positiveClickListener)
 				.create();
 
-		dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+		dialog.setOnShowListener(d -> dialog.getButton(BUTTON_POSITIVE)
 				.setTextColor(ContextCompat.getColor(context, R.color.colorAccent))
 		);
 
@@ -134,7 +71,7 @@ public final class DialogUtils {
 				.create();
 
 		dialog.setOnShowListener(d ->
-				dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(context, R.color.colorAccent))
+				dialog.getButton(BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(context, R.color.colorAccent))
 		);
 
 		dialog.show();

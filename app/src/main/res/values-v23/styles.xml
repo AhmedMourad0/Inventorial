@@ -5,8 +5,4 @@
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <style name="ImagePickerTheme" parent="BaseImagePickerTheme">
-        <item name="android:windowLightStatusBar">true</item>
-    </style>
-
 </resources>

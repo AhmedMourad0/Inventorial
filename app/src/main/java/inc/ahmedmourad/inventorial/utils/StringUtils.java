@@ -4,13 +4,13 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.text.Html;
 
-import java.util.Locale;
+import java.math.BigDecimal;
 
 public final class StringUtils {
 
 	@NonNull
 	public static String toString(final double d) {
-		return String.format(Locale.getDefault(), "%f", d);
+		return new BigDecimal(d).toPlainString();
 	}
 
 	@SuppressWarnings("deprecation")

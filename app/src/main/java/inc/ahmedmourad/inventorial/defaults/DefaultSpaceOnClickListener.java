@@ -16,6 +16,6 @@ public interface DefaultSpaceOnClickListener extends SpaceOnClickListener {
 
 	@Override
 	default void onItemReselected(int itemIndex, String itemName) {
-
+		onItemClick(itemIndex, itemName);
 	}
 }

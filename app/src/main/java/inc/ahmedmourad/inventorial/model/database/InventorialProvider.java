@@ -11,8 +11,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import inc.ahmedmourad.inventorial.model.database.InventorialContract.SuppliersEntry;
 import inc.ahmedmourad.inventorial.model.database.InventorialContract.ProductsEntry;
+import inc.ahmedmourad.inventorial.model.database.InventorialContract.SuppliersEntry;
 
 public class InventorialProvider extends ContentProvider {
 
@@ -24,7 +24,8 @@ public class InventorialProvider extends ContentProvider {
 	private static final int PRODUCTS = 101;
 	private static final int PRODUCT_SUPPLIER_PAIRS = 102;
 
-	private static final int SINGLE_PRODUCT_SUPPLIER_PAIR = 200;
+	private static final int SINGLE_PRODUCT_SUPPLIER_PAIR_BY_PRODUCT_ID = 200;
+	private static final int SINGLE_PRODUCT_SUPPLIER_PAIR_BY_PRODUCT_NAME = 201;
 
 	private static final int PRODUCT_SUPPLIER_PAIRS_BY_SUPPLIER_ID = 300;
 
@@ -32,7 +33,7 @@ public class InventorialProvider extends ContentProvider {
 
 	static {
 		productsQueryBuilder.setTables(ProductsEntry.TABLE_NAME +
-				" INNER JOIN " +
+				" LEFT JOIN " +
 				SuppliersEntry.TABLE_NAME +
 				" ON " +
 				ProductsEntry.TABLE_NAME + "." + ProductsEntry.COLUMN_SUPPLIER_ID +
@@ -51,9 +52,11 @@ public class InventorialProvider extends ContentProvider {
 
 		matcher.addURI(authority, InventorialContract.PATH_PRODUCTS + "/" + ProductsEntry.PATH_PAIRS, PRODUCT_SUPPLIER_PAIRS);
 
-		matcher.addURI(authority, InventorialContract.PATH_PRODUCTS + "/" + ProductsEntry.PATH_PAIRS + "/#", SINGLE_PRODUCT_SUPPLIER_PAIR);
+		matcher.addURI(authority, InventorialContract.PATH_PRODUCTS + "/" + ProductsEntry.PATH_PAIRS + "/#", SINGLE_PRODUCT_SUPPLIER_PAIR_BY_PRODUCT_ID);
 
 		matcher.addURI(authority, InventorialContract.PATH_PRODUCTS + "/" + ProductsEntry.PATH_PAIRS + "/" + ProductsEntry.COLUMN_SUPPLIER_ID + "/#", PRODUCT_SUPPLIER_PAIRS_BY_SUPPLIER_ID);
+
+		matcher.addURI(authority, InventorialContract.PATH_PRODUCTS + "/" + ProductsEntry.PATH_PAIRS + "/*", SINGLE_PRODUCT_SUPPLIER_PAIR_BY_PRODUCT_NAME);
 
 		return matcher;
 	}
@@ -88,7 +91,10 @@ public class InventorialProvider extends ContentProvider {
 			case PRODUCT_SUPPLIER_PAIRS_BY_SUPPLIER_ID:
 				return ProductsEntry.CONTENT_TYPE;
 
-			case SINGLE_PRODUCT_SUPPLIER_PAIR:
+			case SINGLE_PRODUCT_SUPPLIER_PAIR_BY_PRODUCT_ID:
+				return ProductsEntry.CONTENT_ITEM_TYPE;
+
+			case SINGLE_PRODUCT_SUPPLIER_PAIR_BY_PRODUCT_NAME:
 				return ProductsEntry.CONTENT_ITEM_TYPE;
 
 			default:
@@ -97,14 +103,35 @@ public class InventorialProvider extends ContentProvider {
 	}
 
 	@NonNull
-	private Cursor getAllSuppliers(@Nullable final String sortOrder) {
+	private Cursor getAllSuppliers(@Nullable String[] projection, @Nullable final String sortOrder) {
 
-		final String[] projection = {SuppliersEntry.COLUMN_ID,
-				SuppliersEntry.COLUMN_NAME,
-				SuppliersEntry.COLUMN_PHONE_NUMBER
-		};
+		if (projection == null)
+			projection = new String[]{SuppliersEntry.COLUMN_ID,
+					SuppliersEntry.COLUMN_NAME,
+					SuppliersEntry.COLUMN_PHONE_NUMBER
+			};
 
 		return dbHelper.getReadableDatabase().query(SuppliersEntry.TABLE_NAME,
+				projection,
+				null,
+				null,
+				null,
+				null,
+				sortOrder
+		);
+	}
+
+	@NonNull
+	private Cursor getAllProducts(@Nullable String[] projection, @Nullable final String sortOrder) {
+
+		if (projection == null)
+			projection = new String[]{ProductsEntry.COLUMN_ID,
+					ProductsEntry.COLUMN_NAME,
+					ProductsEntry.COLUMN_PRICE,
+					ProductsEntry.COLUMN_QUANTITY
+			};
+
+		return dbHelper.getReadableDatabase().query(ProductsEntry.TABLE_NAME,
 				projection,
 				null,
 				null,
@@ -121,7 +148,6 @@ public class InventorialProvider extends ContentProvider {
 				ProductsEntry.COLUMN_NAME,
 				ProductsEntry.COLUMN_PRICE,
 				ProductsEntry.COLUMN_QUANTITY,
-				ProductsEntry.COLUMN_IMAGE,
 				SuppliersEntry.COLUMN_ID,
 				SuppliersEntry.COLUMN_NAME,
 				SuppliersEntry.COLUMN_PHONE_NUMBER
@@ -144,7 +170,6 @@ public class InventorialProvider extends ContentProvider {
 				ProductsEntry.COLUMN_NAME,
 				ProductsEntry.COLUMN_PRICE,
 				ProductsEntry.COLUMN_QUANTITY,
-				ProductsEntry.COLUMN_IMAGE,
 				SuppliersEntry.COLUMN_ID,
 				SuppliersEntry.COLUMN_NAME,
 				SuppliersEntry.COLUMN_PHONE_NUMBER
@@ -163,10 +188,10 @@ public class InventorialProvider extends ContentProvider {
 	@NonNull
 	private Cursor getPair(final long productId) {
 
-		final String[] projection = {ProductsEntry.COLUMN_NAME,
+		final String[] projection = {ProductsEntry.COLUMN_ID,
+				ProductsEntry.COLUMN_NAME,
 				ProductsEntry.COLUMN_PRICE,
 				ProductsEntry.COLUMN_QUANTITY,
-				ProductsEntry.COLUMN_IMAGE,
 				SuppliersEntry.COLUMN_ID,
 				SuppliersEntry.COLUMN_NAME,
 				SuppliersEntry.COLUMN_PHONE_NUMBER
@@ -182,6 +207,28 @@ public class InventorialProvider extends ContentProvider {
 		);
 	}
 
+	@NonNull
+	private Cursor getPair(@NonNull final String productName) {
+
+		final String[] projection = {ProductsEntry.COLUMN_ID,
+				ProductsEntry.COLUMN_NAME,
+				ProductsEntry.COLUMN_PRICE,
+				ProductsEntry.COLUMN_QUANTITY,
+				SuppliersEntry.COLUMN_ID,
+				SuppliersEntry.COLUMN_NAME,
+				SuppliersEntry.COLUMN_PHONE_NUMBER
+		};
+
+		return productsQueryBuilder.query(dbHelper.getReadableDatabase(),
+				projection,
+				ProductsEntry.TABLE_NAME + "." + ProductsEntry.COLUMN_NAME + " = ?",
+				new String[]{productName},
+				null,
+				null,
+				null
+		);
+	}
+
 	@Override
 	public Cursor query(@NonNull final Uri uri, final String[] projection, final String selection, final String[] selectionArgs, final String sortOrder) {
 
@@ -189,8 +236,13 @@ public class InventorialProvider extends ContentProvider {
 
 		switch (matcher.match(uri)) {
 
+			case PRODUCTS: {
+				cursor = getAllProducts(projection, sortOrder);
+				break;
+			}
+
 			case SUPPLIERS: {
-				cursor = getAllSuppliers(sortOrder);
+				cursor = getAllSuppliers(projection, sortOrder);
 				break;
 			}
 
@@ -199,8 +251,13 @@ public class InventorialProvider extends ContentProvider {
 				break;
 			}
 
-			case SINGLE_PRODUCT_SUPPLIER_PAIR: {
+			case SINGLE_PRODUCT_SUPPLIER_PAIR_BY_PRODUCT_ID: {
 				cursor = getPair(ProductsEntry.getProductIdFromPairUri(uri));
+				break;
+			}
+
+			case SINGLE_PRODUCT_SUPPLIER_PAIR_BY_PRODUCT_NAME: {
+				cursor = getPair(ProductsEntry.getProductNameFromPairUri(uri));
 				break;
 			}
 
@@ -219,26 +276,6 @@ public class InventorialProvider extends ContentProvider {
 		return cursor;
 	}
 
-	private int getSupplierId(@NonNull final String name) {
-
-		final Cursor cursor = writableDatabase.query(SuppliersEntry.TABLE_NAME,
-				new String[]{SuppliersEntry.COLUMN_ID},
-				SuppliersEntry.COLUMN_NAME + " = ?",
-				new String[]{name},
-				null,
-				null,
-				null
-		);
-
-		cursor.moveToFirst();
-
-		final int id = cursor.getInt(0);
-
-		cursor.close();
-
-		return id;
-	}
-
 	@Override
 	public Uri insert(@NonNull final Uri uri, final ContentValues values) {
 
@@ -248,28 +285,11 @@ public class InventorialProvider extends ContentProvider {
 
 			case SUPPLIERS: {
 
-				// Since we have foreign keys associated with our supplier ids, we don't want our record
-				// replaced with a new one every time we reinsert the supplier, so since this version of SQLite
-				// doesn't support ON CONFLICT UPDATE, we take this approach instead.
-
-				final String name = values.getAsString(SuppliersEntry.COLUMN_NAME);
-
-				final int rowsUpdated = update(uri,
+				final long id = writableDatabase.insertWithOnConflict(SuppliersEntry.TABLE_NAME,
+						null,
 						values,
-						SuppliersEntry.COLUMN_NAME + " = ?",
-						new String[]{name}
+						SQLiteDatabase.CONFLICT_ROLLBACK
 				);
-
-				final long id;
-
-				if (rowsUpdated > 0)
-					id = getSupplierId(name);
-				else
-					id = writableDatabase.insertWithOnConflict(SuppliersEntry.TABLE_NAME,
-							null,
-							values,
-							SQLiteDatabase.CONFLICT_ABORT
-					);
 
 				if (id > 0)
 					returnUri = SuppliersEntry.buildSupplierUriWithId(id);
@@ -284,7 +304,7 @@ public class InventorialProvider extends ContentProvider {
 				final long id = writableDatabase.insertWithOnConflict(ProductsEntry.TABLE_NAME,
 						null,
 						values,
-						SQLiteDatabase.CONFLICT_REPLACE
+						SQLiteDatabase.CONFLICT_ROLLBACK
 				);
 
 				if (id > 0)

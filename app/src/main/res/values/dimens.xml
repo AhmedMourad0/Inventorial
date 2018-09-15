@@ -2,7 +2,7 @@
 <resources>
     <dimen name="speed_dial_margin">16dp</dimen>
 
-    <dimen name="space_text_size">18sp</dimen>
+    <dimen name="space_text_size">14sp</dimen>
 
     <dimen name="add_product_elements_spacing">24dp</dimen>
     <dimen name="add_product_save_side_margins">32dp</dimen>
@@ -16,7 +16,6 @@
     <dimen name="details_card_margin_sides">8dp</dimen>
 
     <dimen name="details_section_padding_top">28dp</dimen>
-    <dimen name="details_section_padding_bottom">20dp</dimen>
 
     <dimen name="details_element_margin_bottom">12dp</dimen>
     <dimen name="details_element_drawable_padding">22dp</dimen>
@@ -24,9 +23,16 @@
     <dimen name="details_element_text_size">15sp</dimen>
     <dimen name="details_element_padding_end">8dp</dimen>
 
-    <dimen name="product_arrow_padding_bottom">12dp</dimen>
     <dimen name="product_arrow_padding_end">16dp</dimen>
     <dimen name="product_arrow_padding_start">16dp</dimen>
-    <dimen name="product_arrow_padding_top">12dp</dimen>
+
+    <dimen name="product_arrow_text_spacing">2dp</dimen>
+    <dimen name="divider_height">1dp</dimen>
+    <dimen name="divider_margin_bottom">8dp</dimen>
+    <dimen name="divider_margin_end">16dp</dimen>
+    <dimen name="divider_margin_start">66dp</dimen>
+    <dimen name="divider_margin_top">8dp</dimen>
+    <dimen name="product_arrow_padding_border">8dp</dimen>
+    <dimen name="details_product_image_height">300dp</dimen>
 
 </resources>

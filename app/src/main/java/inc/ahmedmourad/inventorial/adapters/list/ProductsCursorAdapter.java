@@ -9,46 +9,49 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import de.hdodenhof.circleimageview.CircleImageView;
 import inc.ahmedmourad.inventorial.R;
 import inc.ahmedmourad.inventorial.model.database.InventorialDatabase;
-import inc.ahmedmourad.inventorial.model.pojo.Product;
-import inc.ahmedmourad.inventorial.utils.BitmapUtils;
+import inc.ahmedmourad.inventorial.model.pojo.ProductSupplierPair;
 import inc.ahmedmourad.inventorial.utils.DialogUtils;
+import inc.ahmedmourad.inventorial.utils.FileUtils;
 import inc.ahmedmourad.inventorial.utils.StringUtils;
 import inc.ahmedmourad.inventorial.wrappers.ProductsCursorWrapper;
 
 public class ProductsCursorAdapter extends CursorAdapter {
 
-	public ProductsCursorAdapter(@NonNull final Context context) {
-		super(context, null, false);
+	private final OnItemClickListener listener;
+
+	public ProductsCursorAdapter(@NonNull final Context context, @NonNull final Cursor cursor, @NonNull final OnItemClickListener listener) {
+		super(context, new ProductsCursorWrapper(cursor), false);
+		this.listener = listener;
 	}
 
 	@Override
 	public View newView(final Context context, final Cursor cursor, final ViewGroup parent) {
-		final View view = LayoutInflater.from(context).inflate(R.layout.item_product, parent);
+		final View view = LayoutInflater.from(context).inflate(R.layout.item_product, parent, false);
 		view.setTag(new ViewHolder(view));
 		return view;
 	}
 
 	@Override
 	public void bindView(final View view, final Context context, final Cursor cursor) {
-		((ViewHolder) view.getTag()).bind(Product.fromCursor(cursor));
+		((ViewHolder) view.getTag()).bind(ProductSupplierPair.fromCursor(cursor), cursor.getPosition());
 	}
 
 	@Override
-	public Cursor swapCursor(final Cursor newCursor) {
+	public Cursor swapCursor(Cursor newCursor) {
 		return super.swapCursor(new ProductsCursorWrapper(newCursor));
 	}
 
-	static final class ViewHolder {
+	class ViewHolder {
 
 		@BindView(R.id.product_image)
-		CircleImageView imageView;
+		ImageView imageView;
 
 		@BindView(R.id.product_name)
 		TextView nameTextView;
@@ -65,34 +68,36 @@ public class ProductsCursorAdapter extends CursorAdapter {
 		@BindView(R.id.product_decrement)
 		ImageButton decrementButton;
 
+		private final View view;
 		private final Context context;
 
 		private ViewHolder(@NonNull final View view) {
-			context = view.getContext();
+			this.view = view;
+			this.context = view.getContext();
 			ButterKnife.bind(this, view);
 		}
 
-		private void bind(@NonNull final Product product) {
+		private void bind(@NonNull final ProductSupplierPair pair, final int position) {
 
-			imageView.setImageBitmap(BitmapUtils.fromByteArray(product.getImage()));
-			nameTextView.setText(product.getName());
-			priceTextView.setText(StringUtils.toString(product.getPrice()));
+			FileUtils.loadImageFromStorage(context, pair.getProduct().getName(), imageView);
+			nameTextView.setText(pair.getProduct().getName());
+			priceTextView.setText(StringUtils.toString(pair.getProduct().getPrice()));
 
-			if (product.getQuantity() < 0)
-				product.setQuantity(0);
+			if (pair.getProduct().getQuantity() < 0)
+				pair.getProduct().setQuantity(0);
 
-			displayQuantity(product.getQuantity());
+			displayQuantity(pair.getProduct().getQuantity());
 
-			incrementButton.setOnClickListener(v -> increaseQuantity(product, 1));
-			decrementButton.setOnClickListener(v -> decreaseQuantity(product, 1));
+			incrementButton.setOnClickListener(v -> increaseQuantity(pair, 1));
+			decrementButton.setOnClickListener(v -> decreaseQuantity(pair, 1));
 
 			incrementButton.setOnLongClickListener(v -> {
 
 				DialogUtils.showNumberPickerDialog(context,
-						context.getString(R.string.increase_quantity_by, product.getName()),
+						context.getString(R.string.increase_quantity_by, pair.getProduct().getName()),
 						R.string.increase,
-						Integer.MAX_VALUE,
-						number -> increaseQuantity(product, number)
+						(int) (Integer.MAX_VALUE - pair.getProduct().getQuantity()),
+						number -> increaseQuantity(pair, number)
 				);
 
 				return true;
@@ -101,14 +106,16 @@ public class ProductsCursorAdapter extends CursorAdapter {
 			decrementButton.setOnLongClickListener(v -> {
 
 				DialogUtils.showNumberPickerDialog(context,
-						context.getString(R.string.decrease_quantity_by, product.getName()),
+						context.getString(R.string.decrease_quantity_by, pair.getProduct().getName()),
 						R.string.decrease,
-						(int) product.getQuantity(),
-						number -> decreaseQuantity(product, number)
+						(int) pair.getProduct().getQuantity(),
+						number -> decreaseQuantity(pair, number)
 				);
 
 				return true;
 			});
+
+			view.setOnClickListener(v -> listener.onClick(ProductsCursorAdapter.this, pair, position));
 		}
 
 		private void displayQuantity(final double quantity) {
@@ -116,21 +123,26 @@ public class ProductsCursorAdapter extends CursorAdapter {
 			quantityTextView.setText(StringUtils.toString(quantity));
 		}
 
-		private void increaseQuantity(@NonNull final Product product, @IntRange(from = 1, to = Integer.MAX_VALUE) final int value) {
-			product.setQuantity(product.getQuantity() + value);
-			InventorialDatabase.getInstance().updateProduct(context, product.toContentValues(), product.getId());
-			displayQuantity(product.getQuantity());
+		private void increaseQuantity(@NonNull final ProductSupplierPair pair, @IntRange(from = 1, to = Integer.MAX_VALUE) final int value) {
+			pair.getProduct().setQuantity(pair.getProduct().getQuantity() + value);
+			displayQuantity(pair.getProduct().getQuantity());
+			InventorialDatabase.getInstance().updateProduct(context, pair.getProduct().toContentValues(pair.getSupplier().getId()), pair.getProduct().getId());
 		}
 
-		private void decreaseQuantity(@NonNull final Product product, @IntRange(from = 1, to = Integer.MAX_VALUE) final int value) {
+		private void decreaseQuantity(@NonNull final ProductSupplierPair pair, @IntRange(from = 1, to = Integer.MAX_VALUE) final int value) {
 
-			product.setQuantity(product.getQuantity() - value);
+			pair.getProduct().setQuantity(pair.getProduct().getQuantity() - value);
 
-			if (product.getQuantity() < 0)
-				product.setQuantity(0);
+			if (pair.getProduct().getQuantity() < 0)
+				pair.getProduct().setQuantity(0);
 
-			InventorialDatabase.getInstance().updateProduct(context, product.toContentValues(), product.getId());
-			displayQuantity(product.getQuantity());
+			displayQuantity(pair.getProduct().getQuantity());
+			InventorialDatabase.getInstance().updateProduct(context, pair.getProduct().toContentValues(pair.getSupplier().getId()), pair.getProduct().getId());
 		}
+	}
+
+	@FunctionalInterface
+	public interface OnItemClickListener {
+		void onClick(@NonNull ProductsCursorAdapter adapter, @NonNull ProductSupplierPair pair, int position);
 	}
 }

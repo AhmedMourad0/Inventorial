@@ -6,19 +6,41 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import inc.ahmedmourad.inventorial.R;
 import inc.ahmedmourad.inventorial.model.pojo.Supplier;
 
-public class SuppliersArrayAdapter extends ArrayAdapter<Supplier> {
+public class SuppliersArrayAdapter extends BaseAdapter {
 
-	public SuppliersArrayAdapter(@NonNull Context context) {
-		super(context, R.layout.item_spinner_supplier);
-		add(null);
+	private final List<Supplier> suppliers = new ArrayList<>();
+
+	private final Context context;
+
+	public SuppliersArrayAdapter(@NonNull final Context context) {
+		this.context = context;
+		addDefaultItem();
+	}
+
+	@Override
+	public int getCount() {
+		return suppliers.size();
+	}
+
+	@Override
+	public Object getItem(int position) {
+		return suppliers.get(position);
+	}
+
+	@Override
+	public long getItemId(int position) {
+		return position;
 	}
 
 	@NonNull
@@ -43,7 +65,7 @@ public class SuppliersArrayAdapter extends ArrayAdapter<Supplier> {
 
 			if (convertView == null || !DefaultViewHolder.isInstance(convertView.getTag())) {
 
-				view = LayoutInflater.from(getContext()).inflate(R.layout.item_spinner_supplier_default, parent, false);
+				view = LayoutInflater.from(context).inflate(R.layout.item_spinner_supplier_default, parent, false);
 				viewHolder = new DefaultViewHolder(view);
 
 				view.setTag(viewHolder);
@@ -58,13 +80,13 @@ public class SuppliersArrayAdapter extends ArrayAdapter<Supplier> {
 			return view;
 		}
 
-		final Supplier supplier = getItem(position);
+		final Supplier supplier = (Supplier) getItem(position);
 
 		final SupplierViewHolder viewHolder;
 
 		if (convertView == null || !SupplierViewHolder.isInstance(convertView.getTag())) {
 
-			view = LayoutInflater.from(getContext()).inflate(R.layout.item_spinner_supplier, parent, false);
+			view = LayoutInflater.from(context).inflate(R.layout.item_spinner_supplier, parent, false);
 			viewHolder = new SupplierViewHolder(view);
 
 			view.setTag(viewHolder);
@@ -79,10 +101,20 @@ public class SuppliersArrayAdapter extends ArrayAdapter<Supplier> {
 		return view;
 	}
 
-	@Override
 	public void clear() {
-		super.clear();
-		add(null);
+		suppliers.clear();
+		addDefaultItem();
+		notifyDataSetChanged();
+	}
+
+	private void addDefaultItem() {
+		suppliers.add(null);
+		notifyDataSetChanged();
+	}
+
+	public void addAll(@NonNull final List<Supplier> suppliers) {
+		this.suppliers.addAll(suppliers);
+		notifyDataSetChanged();
 	}
 
 	static abstract class ViewHolder<T> {
@@ -101,7 +133,7 @@ public class SuppliersArrayAdapter extends ArrayAdapter<Supplier> {
 
 		static final int TYPE_SUPPLIER = 1;
 
-		@BindView(R.id.spinner_supplier_name)
+		@BindView(R.id.spinner_supplier_text)
 		TextView nameTextView;
 
 		@BindView(R.id.spinner_supplier_phone_number)
@@ -135,7 +167,7 @@ public class SuppliersArrayAdapter extends ArrayAdapter<Supplier> {
 
 		static final int TYPE_DEFAULT = 0;
 
-		@BindView(R.id.spinner_supplier_default_text)
+		@BindView(R.id.spinner_supplier_text)
 		TextView textView;
 
 		private DefaultViewHolder(@NonNull final View view) {

@@ -1,16 +1,17 @@
-package inc.ahmedmourad.inventorial.view;
+package inc.ahmedmourad.inventorial.view.activities;
 
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.view.View;
 import android.widget.AdapterView;
@@ -33,22 +34,42 @@ import butterknife.Unbinder;
 import de.hdodenhof.circleimageview.CircleImageView;
 import inc.ahmedmourad.inventorial.R;
 import inc.ahmedmourad.inventorial.adapters.spinner.SuppliersArrayAdapter;
+import inc.ahmedmourad.inventorial.bus.RxBus;
+import inc.ahmedmourad.inventorial.defaults.DefaultTextWatcher;
 import inc.ahmedmourad.inventorial.model.database.InventorialDatabase;
 import inc.ahmedmourad.inventorial.model.pojo.Product;
 import inc.ahmedmourad.inventorial.model.pojo.ProductSupplierPair;
 import inc.ahmedmourad.inventorial.model.pojo.Supplier;
-import inc.ahmedmourad.inventorial.utils.BitmapUtils;
-import inc.ahmedmourad.inventorial.defaults.DefaultTextWatcher;
-import inc.ahmedmourad.inventorial.utils.DialogUtils;
+import inc.ahmedmourad.inventorial.services.DatabaseService;
 import inc.ahmedmourad.inventorial.utils.ErrorUtils;
+import inc.ahmedmourad.inventorial.utils.FileUtils;
 import inc.ahmedmourad.inventorial.utils.StringUtils;
+import inc.ahmedmourad.inventorial.view.activities.base.SnackbarActivity;
+import inc.ahmedmourad.inventorial.view.fragments.AddSupplierDialogFragment;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
-public class AddProductActivity extends AppCompatActivity implements View.OnClickListener, DefaultTextWatcher, LoaderManager.LoaderCallbacks<Cursor> {
-
-	public static final String KEY_PAIR = "ap_pair";
+public class AddProductActivity extends SnackbarActivity implements View.OnClickListener, DefaultTextWatcher, LoaderManager.LoaderCallbacks<Cursor> {
 
 	private static final int ID_IMAGE_PICKER_REQUEST = 0;
 	private static final int ID_LOADER = 1;
+
+	private static final String TAG_ADD_SUPPLIER_DIALOG = "t_apa_asd";
+
+	public static final String KEY_PAIR = "ap_pair";
+
+	@SuppressWarnings("WeakerAccess")
+	@BindView(R.id.add_product_root)
+	View root;
+
+	@SuppressWarnings("WeakerAccess")
+	@BindView(R.id.add_product_toolbar)
+	Toolbar toolbar;
+
+	@SuppressWarnings("WeakerAccess")
+	@BindView(R.id.add_product_progressbar)
+	MaterialProgressBar progressBar;
 
 	@SuppressWarnings("WeakerAccess")
 	@BindView(R.id.add_product_image)
@@ -87,6 +108,8 @@ public class AddProductActivity extends AppCompatActivity implements View.OnClic
 
 	private SuppliersArrayAdapter adapter;
 
+	private Disposable disposable;
+
 	private Unbinder unbinder;
 
 	@Override
@@ -96,8 +119,8 @@ public class AddProductActivity extends AppCompatActivity implements View.OnClic
 
 		unbinder = ButterKnife.bind(this);
 
-		if (getSupportActionBar() != null)
-			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		setSupportActionBar(toolbar);
+		displayUpButton(toolbar);
 
 		final Intent intent = getIntent();
 
@@ -124,7 +147,7 @@ public class AddProductActivity extends AppCompatActivity implements View.OnClic
 
 	private void populateUi() {
 		if (pair != null) {
-			imageView.setImageBitmap(BitmapUtils.fromByteArray(pair.getProduct().getImage()));
+			FileUtils.loadImageFromStorage(this, pair.getProduct().getName(), imageView);
 			nameEditText.setText(pair.getProduct().getName());
 			priceEditText.setText(StringUtils.toString(pair.getProduct().getPrice()));
 			quantityEditText.setText(StringUtils.toString(pair.getProduct().getQuantity()));
@@ -137,7 +160,7 @@ public class AddProductActivity extends AppCompatActivity implements View.OnClic
 	}
 
 	private void validateProductInputs() {
-		saveButton.setEnabled(areProductInputsValid());
+		setSaveButtonEnabled(areProductInputsValid());
 	}
 
 	private boolean areProductInputsValid() {
@@ -159,42 +182,58 @@ public class AddProductActivity extends AppCompatActivity implements View.OnClic
 				.limit(1)
 				.showCamera(true)
 				.imageDirectory(getString(R.string.camera))
+				// I've just gained a lot more respect for this library.
+				// You should be ashamed Google, you should be ashamed.
+				.toolbarArrowColor(ContextCompat.getColor(this, android.R.color.black))
 				.theme(R.style.ImagePickerTheme)
 				.enableLog(true)
 				.getIntent(this), ID_IMAGE_PICKER_REQUEST
 		);
 	}
 
-	private void setPictureEnabled(final boolean enabled) {
-		imageView.setEnabled(enabled);
-		imageTextView.setEnabled(enabled);
-	}
-
 	private void insertProduct() {
 
-		final Product product = Product.of(nameEditText.getText().toString(),
-				Double.parseDouble(priceEditText.getText().toString()),
-				Double.parseDouble(quantityEditText.getText().toString()),
-				BitmapUtils.toByteArray(imageView)
+		final String productName = nameEditText.getText().toString().trim();
+
+		if (!InventorialDatabase.getInstance().isProductNameValid(this, root, productName))
+			return;
+
+		final ProductSupplierPair pair = new ProductSupplierPair();
+
+		final Product product = Product.of(productName,
+				Double.parseDouble(priceEditText.getText().toString().trim()),
+				Double.parseDouble(quantityEditText.getText().toString().trim())
 		);
+
+		pair.setProduct(product);
 
 		final ContentValues values;
 		final int position = suppliersSpinner.getSelectedItemPosition();
 
 		if (position > 0) {
 
-			final Supplier supplier = adapter.getItem(position);
+			final Supplier supplier = (Supplier) adapter.getItem(position);
 
-			if (supplier != null)
+			if (supplier != null) {
 				values = product.toContentValues(supplier.getId());
-			else
+				pair.setSupplier(supplier);
+			} else {
 				values = product.toContentValues();
+				pair.setSupplier(new Supplier());
+			}
 
 		} else {
 			values = product.toContentValues();
+			pair.setSupplier(new Supplier());
 		}
 
-		InventorialDatabase.getInstance().insertProduct(this, values);
+		FileUtils.saveToInternalStorage(this, imageView, productName);
+		DatabaseService.startActionInsertProduct(this, values);
+		finish();
+
+		final Intent intent = new Intent(this, DetailsActivity.class);
+		intent.putExtra(DetailsActivity.KEY_PAIR, Parcels.wrap(pair));
+		startActivity(intent);
 	}
 
 	private void updateProduct() {
@@ -202,29 +241,67 @@ public class AddProductActivity extends AppCompatActivity implements View.OnClic
 		if (pair == null)
 			return;
 
-		final Product product = Product.of(nameEditText.getText().toString(),
-				Double.parseDouble(priceEditText.getText().toString()),
-				Double.parseDouble(quantityEditText.getText().toString()),
-				BitmapUtils.toByteArray(imageView)
+		final String productName = nameEditText.getText().toString().trim();
+
+		if (!pair.getProduct().getName().equals(productName)) {
+
+			if (!InventorialDatabase.getInstance().isProductNameValid(this, root, productName))
+				return;
+
+			FileUtils.deleteFile(this, pair.getProduct().getName());
+		}
+
+		final ProductSupplierPair pair = new ProductSupplierPair();
+
+		final Product product = Product.of(productName,
+				Double.parseDouble(priceEditText.getText().toString().trim()),
+				Double.parseDouble(quantityEditText.getText().toString().trim())
 		);
+
+		product.setId(this.pair.getProduct().getId());
+
+		pair.setProduct(product);
 
 		final ContentValues values;
 		final int position = suppliersSpinner.getSelectedItemPosition();
 
 		if (position > 0) {
 
-			final Supplier supplier = adapter.getItem(position);
+			final Supplier supplier = (Supplier) adapter.getItem(position);
 
-			if (supplier != null)
+			if (supplier != null) {
 				values = product.toContentValues(supplier.getId());
-			else
+				pair.setSupplier(supplier);
+			} else {
 				values = product.toContentValues();
+				pair.setSupplier(new Supplier());
+			}
 
 		} else {
 			values = product.toContentValues();
+			pair.setSupplier(new Supplier());
 		}
 
-		InventorialDatabase.getInstance().updateProduct(this, values, pair.getProduct().getId());
+		FileUtils.saveToInternalStorage(this, imageView, productName);
+		DatabaseService.startActionUpdateProduct(this, values, pair.getProduct().getId());
+		finish();
+	}
+
+	private void setPictureEnabled(final boolean enabled) {
+		imageView.setEnabled(enabled);
+		imageTextView.setEnabled(enabled);
+		imageView.setAlpha(enabled ? 1f : 0.3f);
+		imageTextView.setAlpha(enabled ? 1f : 0.3f);
+	}
+
+	private void setSaveButtonEnabled(final boolean enabled) {
+		saveButton.setAlpha(enabled ? 1f : 0.3f);
+		saveButton.setEnabled(enabled);
+	}
+
+	private void setSpinnerEnabled(final boolean enabled) {
+		suppliersSpinner.setEnabled(enabled);
+		suppliersSpinner.setAlpha(enabled ? 1f : 0.5f);
 	}
 
 	private int getSpinnerItemPosition(final long supplierId) {
@@ -234,13 +311,40 @@ public class AddProductActivity extends AppCompatActivity implements View.OnClic
 
 		for (int i = 1; i < adapter.getCount(); ++i) {
 
-			final Supplier s = adapter.getItem(i);
+			final Supplier s = (Supplier) adapter.getItem(i);
 
 			if (s != null && s.getId() == supplierId)
 				return i;
 		}
 
 		return 0;
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		getSupportLoaderManager().restartLoader(ID_LOADER, null, this);
+
+		displayCurrentState(RxBus.getInstance().getCurrentState());
+
+		disposable = RxBus.getInstance()
+				.getCurrentStateRelay()
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribe(this::displayCurrentState,
+						throwable -> ErrorUtils.general(getApplicationContext(), throwable));
+	}
+
+	private void displayCurrentState(final int state) {
+		if (state == RxBus.STATE_IN_PROGRESS)
+			progressBar.setVisibility(View.VISIBLE);
+		else
+			progressBar.setVisibility(View.GONE);
+	}
+
+	@Override
+	protected void onStop() {
+		disposable.dispose();
+		super.onStop();
 	}
 
 	@Override
@@ -293,7 +397,7 @@ public class AddProductActivity extends AppCompatActivity implements View.OnClic
 				break;
 
 			case R.id.product_new_supplier:
-				DialogUtils.showNewSupplierDialog(this);
+				new AddSupplierDialogFragment().show(getSupportFragmentManager(), TAG_ADD_SUPPLIER_DIALOG);
 				break;
 		}
 	}
@@ -310,8 +414,8 @@ public class AddProductActivity extends AppCompatActivity implements View.OnClic
 	@NonNull
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
-		suppliersSpinner.setEnabled(false);
-		return InventorialDatabase.getInstance().getAllSuppliers(this);
+		setSpinnerEnabled(false);
+		return InventorialDatabase.getInstance().getAllSuppliersLoader(this, null);
 	}
 
 	@Override
@@ -323,11 +427,11 @@ public class AddProductActivity extends AppCompatActivity implements View.OnClic
 
 		if (isFirstLoad && pair != null) {
 
-			selectedSupplierId = pair.getProduct().getId();
+			selectedSupplierId = pair.getSupplier().getId();
 
 		} else if (suppliersSpinner.getSelectedItemPosition() != AdapterView.INVALID_POSITION) {
 
-			final Supplier selectedSupplier = adapter.getItem(suppliersSpinner.getSelectedItemPosition());
+			final Supplier selectedSupplier = (Supplier) suppliersSpinner.getSelectedItem();
 			selectedSupplierId = selectedSupplier == null ? -1 : selectedSupplier.getId();
 
 		} else {
@@ -348,7 +452,7 @@ public class AddProductActivity extends AppCompatActivity implements View.OnClic
 
 			} while (cursor.moveToNext());
 
-			suppliersSpinner.setEnabled(true);
+			setSpinnerEnabled(true);
 			adapter.addAll(suppliers);
 		}
 
@@ -359,6 +463,12 @@ public class AddProductActivity extends AppCompatActivity implements View.OnClic
 	public void onLoaderReset(@NonNull Loader<Cursor> loader) {
 		adapter.clear();
 		suppliersSpinner.setSelection(0);
-		suppliersSpinner.setEnabled(false);
+		setSpinnerEnabled(false);
+	}
+
+	@NonNull
+	@Override
+	public View getRootView() {
+		return root;
 	}
 }
