@@ -133,7 +133,6 @@ public class DetailsActivity extends BaseActivity implements View.OnClickListene
 
 			if (intent.hasExtra(KEY_PAIR)) {
 				pair = Parcels.unwrap(intent.getParcelableExtra(KEY_PAIR));
-				populateUi();
 			} else if (intent.hasExtra(KEY_PAIR_ID)) {
 				productId = intent.getLongExtra(KEY_PAIR_ID, -1);
 			} else {
@@ -160,12 +159,12 @@ public class DetailsActivity extends BaseActivity implements View.OnClickListene
 		supplierProductsButton.setOnClickListener(this);
 
 		initializeSpaceView();
-		populateUi();
+		populateUi(true);
 
 		getSupportLoaderManager().initLoader(ID_LOADER, null, this);
 	}
 
-	private void populateUi() {
+	private void populateUi(final boolean loadImage) {
 
 		if (pair == null)
 			return;
@@ -176,7 +175,9 @@ public class DetailsActivity extends BaseActivity implements View.OnClickListene
 			pair.getProduct().setQuantity(0);
 
 		productPriceTextView.setText(getString(R.string.details_price, StringUtils.toString(pair.getProduct().getPrice())));
-		FileUtils.loadImageFromStorage(this, pair.getProduct().getName(), productImageView);
+
+		if (loadImage)
+			FileUtils.loadImageFromStorage(this, pair.getProduct().getName(), productImageView);
 
 		displayQuantity();
 
@@ -358,10 +359,18 @@ public class DetailsActivity extends BaseActivity implements View.OnClickListene
 	}
 
 	private void displayCurrentState(final int state) {
-		if (state == RxBus.STATE_IN_PROGRESS)
+
+		if (state == RxBus.STATE_IN_PROGRESS) {
+
 			progressBar.setVisibility(View.VISIBLE);
-		else
+
+		} else {
+
 			progressBar.setVisibility(View.GONE);
+
+			if (pair != null)
+				FileUtils.loadImageFromStorage(this, pair.getProduct().getName(), productImageView);
+		}
 	}
 
 	@Override
@@ -433,7 +442,7 @@ public class DetailsActivity extends BaseActivity implements View.OnClickListene
 	public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
 		if (cursor.moveToFirst()) {
 			pair = ProductSupplierPair.fromCursor(cursor);
-			populateUi();
+			populateUi(false);
 		}
 	}
 
