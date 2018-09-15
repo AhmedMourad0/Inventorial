@@ -119,8 +119,13 @@ public class ProductsCursorAdapter extends CursorAdapter {
 		}
 
 		private void displayQuantity(final double quantity) {
-			decrementButton.setEnabled(quantity >= 1);
+			setDecrementButtonEnabled(quantity >= 1);
 			quantityTextView.setText(StringUtils.toString(quantity));
+		}
+
+		private void setDecrementButtonEnabled(final boolean enabled) {
+			decrementButton.setEnabled(enabled);
+			decrementButton.setAlpha(enabled ? 1f : 0.3f);
 		}
 
 		private void increaseQuantity(@NonNull final ProductSupplierPair pair, @IntRange(from = 1, to = Integer.MAX_VALUE) final int value) {

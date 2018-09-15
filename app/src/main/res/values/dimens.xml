@@ -34,5 +34,6 @@
     <dimen name="divider_margin_top">8dp</dimen>
     <dimen name="product_arrow_padding_border">8dp</dimen>
     <dimen name="details_product_image_height">300dp</dimen>
+    <dimen name="product_image_size">68dp</dimen>
 
 </resources>
