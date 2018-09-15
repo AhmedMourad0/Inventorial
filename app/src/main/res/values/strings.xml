@@ -49,4 +49,6 @@
     <string name="product_name_exists">Product name already exists!</string>
     <string name="supplier_name_exists">Supplier name already exists!</string>
     <string name="view">View</string>
+    <string name="sans_serif_light" translatable="false">sans-serif-light</string>
+    <string name="sans_serif" translatable="false">sans-serif</string>
 </resources>

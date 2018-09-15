@@ -11,7 +11,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
 
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:fontFamily">@string/sans_serif</item>
 
         <item name="toolbarStyle">@style/Toolbar</item>
 
@@ -33,7 +33,7 @@
     </style>
 
     <style name="TitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:fontFamily">@string/sans_serif</item>
         <item name="android:textStyle">bold</item>
     </style>
 
