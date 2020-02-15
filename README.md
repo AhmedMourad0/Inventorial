@@ -9,14 +9,17 @@ Inventorial is a simple mobile storage management system.
 
 ## Screenshots
 
-### Products
+
+### *Products*
+
 
 ![Screenshot 16](/screenshots/16.jpg)
 
 ![Screenshot 17](/screenshots/17.jpg)
 
 
-### Adding suppliers
+### *Adding suppliers*
+
 
 ![Screenshot 18](/screenshots/18.jpg)
 
@@ -27,7 +30,8 @@ Inventorial is a simple mobile storage management system.
 ![Screenshot 3](/screenshots/3.jpg)
 
 
-### Adding Products
+### *Adding Products*
+
 
 ![Screenshot 18](/screenshots/18.jpg)
 
@@ -42,7 +46,8 @@ Inventorial is a simple mobile storage management system.
 ![Screenshot 27](/screenshots/27.jpg)
 
 
-### Product Viewer
+### *Product Viewer*
+
 
 ![Screenshot 5](/screenshots/5.jpg)
 
@@ -59,7 +64,8 @@ Inventorial is a simple mobile storage management system.
 ![Screenshot 15](/screenshots/15.jpg)
 
 
-### Updating a Product
+### *Updating a Product*
+
 
 ![Screenshot 12](/screenshots/12.jpg)
 
@@ -78,12 +84,14 @@ Inventorial is a simple mobile storage management system.
 ![Screenshot 0](/screenshots/0.jpg)
 
 
-### Deleting a Product
+### *Deleting a Product*
+
 
 ![Screenshot 14](/screenshots/14.jpg)
 
 
-### Products from a Specific Supplier
+### *Products from a Specific Supplier*
+
 
 ![Screenshot 26](/screenshots/26.jpg)
 
