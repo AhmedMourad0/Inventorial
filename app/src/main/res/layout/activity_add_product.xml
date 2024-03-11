@@ -104,6 +104,7 @@
                     android:orientation="horizontal">
 
                     <include
+                        android:id="@+id/add_product_spinner"
                         layout="@layout/content_add_product_spinner"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"

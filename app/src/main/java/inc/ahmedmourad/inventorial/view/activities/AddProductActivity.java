@@ -28,13 +28,11 @@ import org.parceler.Parcels;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import de.hdodenhof.circleimageview.CircleImageView;
 import inc.ahmedmourad.inventorial.R;
 import inc.ahmedmourad.inventorial.adapters.spinner.SuppliersArrayAdapter;
 import inc.ahmedmourad.inventorial.bus.RxBus;
+import inc.ahmedmourad.inventorial.databinding.ActivityAddProductBinding;
 import inc.ahmedmourad.inventorial.defaults.DefaultTextWatcher;
 import inc.ahmedmourad.inventorial.model.database.InventorialDatabase;
 import inc.ahmedmourad.inventorial.model.pojo.Product;
@@ -59,50 +57,6 @@ public class AddProductActivity extends SnackbarActivity implements View.OnClick
 
 	public static final String KEY_PAIR = "ap_pair";
 
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.add_product_root)
-	View root;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.add_product_toolbar)
-	Toolbar toolbar;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.add_product_progressbar)
-	MaterialProgressBar progressBar;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.add_product_image)
-	CircleImageView imageView;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.add_product_image_text)
-	TextView imageTextView;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.add_product_name)
-	TextInputEditText nameEditText;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.add_product_price)
-	TextInputEditText priceEditText;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.add_product_quantity)
-	TextInputEditText quantityEditText;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.add_product_suppliers)
-	Spinner suppliersSpinner;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.product_new_supplier)
-	Button newSupplierButton;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.add_product_save)
-	Button saveButton;
-
 	@Nullable
 	private ProductSupplierPair pair;
 
@@ -110,34 +64,33 @@ public class AddProductActivity extends SnackbarActivity implements View.OnClick
 
 	private Disposable disposable;
 
-	private Unbinder unbinder;
+	private ActivityAddProductBinding binding;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_add_product);
+		binding = ActivityAddProductBinding.inflate(getLayoutInflater());
+		setContentView(binding.getRoot());
 
-		unbinder = ButterKnife.bind(this);
-
-		setSupportActionBar(toolbar);
-		displayUpButton(toolbar);
+		setSupportActionBar(binding.addProductToolbar);
+		displayUpButton(binding.addProductToolbar);
 
 		final Intent intent = getIntent();
 
 		if (intent != null && intent.hasExtra(KEY_PAIR)) {
 			pair = Parcels.unwrap(intent.getParcelableExtra(KEY_PAIR));
-			saveButton.setText(R.string.update);
+			binding.addProductSave.setText(R.string.update);
 			populateUi();
 		}
 
-		imageView.setOnClickListener(this);
-		imageTextView.setOnClickListener(this);
-		saveButton.setOnClickListener(this);
-		newSupplierButton.setOnClickListener(this);
+		binding.addProductImage.setOnClickListener(this);
+		binding.addProductImageText.setOnClickListener(this);
+		binding.addProductSave.setOnClickListener(this);
+		binding.productNewSupplier.setOnClickListener(this);
 
-		nameEditText.addTextChangedListener(this);
-		priceEditText.addTextChangedListener(this);
-		quantityEditText.addTextChangedListener(this);
+		binding.addProductName.addTextChangedListener(this);
+		binding.addProductPrice.addTextChangedListener(this);
+		binding.addProductQuantity.addTextChangedListener(this);
 
 		validateProductInputs();
 		initializeSpinnerAdapter();
@@ -147,16 +100,16 @@ public class AddProductActivity extends SnackbarActivity implements View.OnClick
 
 	private void populateUi() {
 		if (pair != null) {
-			FileUtils.loadImageFromStorage(this, pair.getProduct().getName(), imageView);
-			nameEditText.setText(pair.getProduct().getName());
-			priceEditText.setText(StringUtils.toString(pair.getProduct().getPrice()));
-			quantityEditText.setText(StringUtils.toString(pair.getProduct().getQuantity()));
+			FileUtils.loadImageFromStorage(this, pair.getProduct().getName(), binding.addProductImage);
+			binding.addProductName.setText(pair.getProduct().getName());
+			binding.addProductPrice.setText(StringUtils.toString(pair.getProduct().getPrice()));
+			binding.addProductQuantity.setText(StringUtils.toString(pair.getProduct().getQuantity()));
 		}
 	}
 
 	private void initializeSpinnerAdapter() {
 		adapter = new SuppliersArrayAdapter(this);
-		suppliersSpinner.setAdapter(adapter);
+		binding.addProductSpinner.addProductSuppliers.setAdapter(adapter);
 	}
 
 	private void validateProductInputs() {
@@ -164,9 +117,9 @@ public class AddProductActivity extends SnackbarActivity implements View.OnClick
 	}
 
 	private boolean areProductInputsValid() {
-		return nameEditText.getText().toString().trim().length() > 0 &&
-				priceEditText.getText().toString().trim().length() > 0 &&
-				quantityEditText.getText().toString().trim().length() > 0;
+		return binding.addProductName.getText().toString().trim().length() > 0 &&
+				binding.addProductPrice.getText().toString().trim().length() > 0 &&
+				binding.addProductQuantity.getText().toString().trim().length() > 0;
 	}
 
 	private void startImagePicker() {
@@ -193,22 +146,22 @@ public class AddProductActivity extends SnackbarActivity implements View.OnClick
 
 	private void insertProduct() {
 
-		final String productName = nameEditText.getText().toString().trim();
+		final String productName = binding.addProductName.getText().toString().trim();
 
-		if (!InventorialDatabase.getInstance().isProductNameValid(this, root, productName))
+		if (!InventorialDatabase.getInstance().isProductNameValid(this, binding.getRoot(), productName))
 			return;
 
 		final ProductSupplierPair pair = new ProductSupplierPair();
 
 		final Product product = Product.of(productName,
-				Double.parseDouble(priceEditText.getText().toString().trim()),
-				Double.parseDouble(quantityEditText.getText().toString().trim())
+				Double.parseDouble(binding.addProductPrice.getText().toString().trim()),
+				Double.parseDouble(binding.addProductQuantity.getText().toString().trim())
 		);
 
 		pair.setProduct(product);
 
 		final ContentValues values;
-		final int position = suppliersSpinner.getSelectedItemPosition();
+		final int position = binding.addProductSpinner.addProductSuppliers.getSelectedItemPosition();
 
 		if (position > 0) {
 
@@ -227,7 +180,7 @@ public class AddProductActivity extends SnackbarActivity implements View.OnClick
 			pair.setSupplier(new Supplier());
 		}
 
-		FileUtils.saveToInternalStorage(this, imageView, productName);
+		FileUtils.saveToInternalStorage(this, binding.addProductImage, productName);
 		DatabaseService.startActionInsertProduct(this, values);
 		finish();
 
@@ -241,11 +194,11 @@ public class AddProductActivity extends SnackbarActivity implements View.OnClick
 		if (pair == null)
 			return;
 
-		final String productName = nameEditText.getText().toString().trim();
+		final String productName = binding.addProductName.getText().toString().trim();
 
 		if (!pair.getProduct().getName().equals(productName)) {
 
-			if (!InventorialDatabase.getInstance().isProductNameValid(this, root, productName))
+			if (!InventorialDatabase.getInstance().isProductNameValid(this, binding.getRoot(), productName))
 				return;
 
 			FileUtils.deleteFile(this, pair.getProduct().getName());
@@ -254,8 +207,8 @@ public class AddProductActivity extends SnackbarActivity implements View.OnClick
 		final ProductSupplierPair pair = new ProductSupplierPair();
 
 		final Product product = Product.of(productName,
-				Double.parseDouble(priceEditText.getText().toString().trim()),
-				Double.parseDouble(quantityEditText.getText().toString().trim())
+				Double.parseDouble(binding.addProductPrice.getText().toString().trim()),
+				Double.parseDouble(binding.addProductQuantity.getText().toString().trim())
 		);
 
 		product.setId(this.pair.getProduct().getId());
@@ -263,7 +216,7 @@ public class AddProductActivity extends SnackbarActivity implements View.OnClick
 		pair.setProduct(product);
 
 		final ContentValues values;
-		final int position = suppliersSpinner.getSelectedItemPosition();
+		final int position = binding.addProductSpinner.addProductSuppliers.getSelectedItemPosition();
 
 		if (position > 0) {
 
@@ -282,26 +235,26 @@ public class AddProductActivity extends SnackbarActivity implements View.OnClick
 			pair.setSupplier(new Supplier());
 		}
 
-		FileUtils.saveToInternalStorage(this, imageView, productName);
+		FileUtils.saveToInternalStorage(this, binding.addProductImage, productName);
 		DatabaseService.startActionUpdateProduct(this, values, pair.getProduct().getId());
 		finish();
 	}
 
 	private void setPictureEnabled(final boolean enabled) {
-		imageView.setEnabled(enabled);
-		imageTextView.setEnabled(enabled);
-		imageView.setAlpha(enabled ? 1f : 0.3f);
-		imageTextView.setAlpha(enabled ? 1f : 0.3f);
+		binding.addProductImage.setEnabled(enabled);
+		binding.addProductImageText.setEnabled(enabled);
+		binding.addProductImage.setAlpha(enabled ? 1f : 0.3f);
+		binding.addProductImageText.setAlpha(enabled ? 1f : 0.3f);
 	}
 
 	private void setSaveButtonEnabled(final boolean enabled) {
-		saveButton.setAlpha(enabled ? 1f : 0.3f);
-		saveButton.setEnabled(enabled);
+		binding.addProductSave.setAlpha(enabled ? 1f : 0.3f);
+		binding.addProductSave.setEnabled(enabled);
 	}
 
 	private void setSpinnerEnabled(final boolean enabled) {
-		suppliersSpinner.setEnabled(enabled);
-		suppliersSpinner.setAlpha(enabled ? 1f : 0.5f);
+		binding.addProductSpinner.addProductSuppliers.setEnabled(enabled);
+		binding.addProductSpinner.addProductSuppliers.setAlpha(enabled ? 1f : 0.5f);
 	}
 
 	private int getSpinnerItemPosition(final long supplierId) {
@@ -336,9 +289,9 @@ public class AddProductActivity extends SnackbarActivity implements View.OnClick
 
 	private void displayCurrentState(final int state) {
 		if (state == RxBus.STATE_IN_PROGRESS)
-			progressBar.setVisibility(View.VISIBLE);
+			binding.addProductProgressbar.setVisibility(View.VISIBLE);
 		else
-			progressBar.setVisibility(View.GONE);
+			binding.addProductProgressbar.setVisibility(View.GONE);
 	}
 
 	@Override
@@ -365,41 +318,27 @@ public class AddProductActivity extends SnackbarActivity implements View.OnClick
 			final Image image = ImagePicker.getFirstImageOrNull(data);
 
 			if (image != null)
-				imageView.setImageBitmap(BitmapFactory.decodeFile(image.getPath()));
+				binding.addProductImage.setImageBitmap(BitmapFactory.decodeFile(image.getPath()));
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
-	@Override
-	protected void onDestroy() {
-		unbinder.unbind();
-		super.onDestroy();
-	}
-
 	/* View */
-
 	@Override
 	public void onClick(View v) {
 
-		switch (v.getId()) {
-
-			case R.id.add_product_image:
-			case R.id.add_product_image_text:
-				startImagePicker();
-				break;
-
-			case R.id.add_product_save:
-				if (pair == null)
-					insertProduct();
-				else
-					updateProduct();
-				break;
-
-			case R.id.product_new_supplier:
-				new AddSupplierDialogFragment().show(getSupportFragmentManager(), TAG_ADD_SUPPLIER_DIALOG);
-				break;
-		}
+        int id = v.getId();
+        if (id == R.id.add_product_image || id == R.id.add_product_image_text) {
+            startImagePicker();
+        } else if (id == R.id.add_product_save) {
+            if (pair == null)
+                insertProduct();
+            else
+                updateProduct();
+        } else if (id == R.id.product_new_supplier) {
+            new AddSupplierDialogFragment().show(getSupportFragmentManager(), TAG_ADD_SUPPLIER_DIALOG);
+        }
 	}
 
 	/* TextWatcher */
@@ -429,9 +368,9 @@ public class AddProductActivity extends SnackbarActivity implements View.OnClick
 
 			selectedSupplierId = pair.getSupplier().getId();
 
-		} else if (suppliersSpinner.getSelectedItemPosition() != AdapterView.INVALID_POSITION) {
+		} else if (binding.addProductSpinner.addProductSuppliers.getSelectedItemPosition() != AdapterView.INVALID_POSITION) {
 
-			final Supplier selectedSupplier = (Supplier) suppliersSpinner.getSelectedItem();
+			final Supplier selectedSupplier = (Supplier) binding.addProductSpinner.addProductSuppliers.getSelectedItem();
 			selectedSupplierId = selectedSupplier == null ? -1 : selectedSupplier.getId();
 
 		} else {
@@ -456,19 +395,19 @@ public class AddProductActivity extends SnackbarActivity implements View.OnClick
 			adapter.addAll(suppliers);
 		}
 
-		suppliersSpinner.setSelection(getSpinnerItemPosition(selectedSupplierId));
+		binding.addProductSpinner.addProductSuppliers.setSelection(getSpinnerItemPosition(selectedSupplierId));
 	}
 
 	@Override
 	public void onLoaderReset(@NonNull Loader<Cursor> loader) {
 		adapter.clear();
-		suppliersSpinner.setSelection(0);
+		binding.addProductSpinner.addProductSuppliers.setSelection(0);
 		setSpinnerEnabled(false);
 	}
 
 	@NonNull
 	@Override
 	public View getRootView() {
-		return root;
+		return binding.getRoot();
 	}
 }

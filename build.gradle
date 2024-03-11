@@ -5,19 +5,19 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:3.1.4"
+        classpath "com.android.tools.build:gradle:8.2.2"
     }
 }
 
 allprojects {
     repositories {
         google()
-        jcenter()
         maven { url 'https://jitpack.io' }
+        mavenCentral()
+        jcenter()
     }
     ext {
         androidSupportVersion = "27.1.1"
-        butterKnifeVersion = "8.8.1"
         parcelerVersion = "1.1.11"
     }
 }

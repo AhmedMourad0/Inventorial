@@ -9,22 +9,17 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
 
 import com.leinardi.android.speeddial.SpeedDialActionItem;
-import com.leinardi.android.speeddial.SpeedDialView;
 
 import org.parceler.Parcels;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import inc.ahmedmourad.inventorial.R;
 import inc.ahmedmourad.inventorial.adapters.list.ProductsCursorAdapter;
 import inc.ahmedmourad.inventorial.bus.RxBus;
+import inc.ahmedmourad.inventorial.databinding.ActivityMainBinding;
 import inc.ahmedmourad.inventorial.model.database.InventorialDatabase;
 import inc.ahmedmourad.inventorial.model.pojo.Supplier;
 import inc.ahmedmourad.inventorial.utils.ErrorUtils;
@@ -32,7 +27,6 @@ import inc.ahmedmourad.inventorial.view.activities.base.SnackbarActivity;
 import inc.ahmedmourad.inventorial.view.fragments.AddSupplierDialogFragment;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 public class MainActivity extends SnackbarActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -42,30 +36,6 @@ public class MainActivity extends SnackbarActivity implements LoaderManager.Load
 
 	static final String KEY_SUPPLIER_TO_DISPLAY = "m_supplier";
 
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.main_root)
-	View root;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.main_toolbar)
-	Toolbar toolbar;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.main_progressbar)
-	MaterialProgressBar progressBar;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.main_list)
-	ListView listView;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.main_fab)
-	SpeedDialView fab;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.main_empty)
-	View emptyView;
-
 	@Nullable
 	private Supplier supplier;
 
@@ -74,24 +44,23 @@ public class MainActivity extends SnackbarActivity implements LoaderManager.Load
 
 	private Disposable disposable;
 
-	private Unbinder unbinder;
+	private ActivityMainBinding binding;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		binding = ActivityMainBinding.inflate(getLayoutInflater());
+		setContentView(binding.getRoot());
 
-		unbinder = ButterKnife.bind(this);
-
-		setSupportActionBar(toolbar);
+		setSupportActionBar(binding.mainToolbar);
 
 		final Intent intent = getIntent();
 
 		if (intent != null && intent.hasExtra(KEY_SUPPLIER_TO_DISPLAY)) {
 			supplier = Parcels.unwrap(intent.getParcelableExtra(KEY_SUPPLIER_TO_DISPLAY));
 			setTitle(getString(R.string.products_from, supplier.getName()));
-			displayUpButton(toolbar);
-			fab.setVisibility(View.GONE);
+			displayUpButton(binding.mainToolbar);
+			binding.mainFab.setVisibility(View.GONE);
 		}
 
 		initializeSpeedDialFab();
@@ -110,39 +79,35 @@ public class MainActivity extends SnackbarActivity implements LoaderManager.Load
 			startActivity(intent);
 		});
 
-		listView.setAdapter(adapter);
+		binding.mainList.setAdapter(adapter);
 
-		listView.setEmptyView(emptyView);
+		binding.mainList.setEmptyView(binding.mainEmpty.getRoot());
 	}
 
 	private void initializeSpeedDialFab() {
 
-		fab.addActionItem(new SpeedDialActionItem.Builder(R.id.fab_add_supplier, R.drawable.ic_factory)
+		binding.mainFab.addActionItem(new SpeedDialActionItem.Builder(R.id.fab_add_supplier, R.drawable.ic_factory)
 				.setLabel(getString(R.string.add_new_supplier))
 				.setFabBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary))
 				.create()
 		);
 
-		fab.addActionItem(new SpeedDialActionItem.Builder(R.id.fab_add_product, R.drawable.ic_basket)
+		binding.mainFab.addActionItem(new SpeedDialActionItem.Builder(R.id.fab_add_product, R.drawable.ic_basket)
 				.setLabel(getString(R.string.add_new_product))
 				.setFabBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary))
 				.create()
 		);
 
-		fab.setOnActionSelectedListener(actionItem -> {
+		binding.mainFab.setOnActionSelectedListener(actionItem -> {
 
-			switch (actionItem.getId()) {
+            int id = actionItem.getId();
+            if (id == R.id.fab_add_product) {
+                startActivity(new Intent(MainActivity.this, AddProductActivity.class));
+            } else if (id == R.id.fab_add_supplier) {
+                new AddSupplierDialogFragment().show(getSupportFragmentManager(), TAG_ADD_SUPPLIER_DIALOG);
+            }
 
-				case R.id.fab_add_product:
-					startActivity(new Intent(MainActivity.this, AddProductActivity.class));
-					break;
-
-				case R.id.fab_add_supplier:
-					new AddSupplierDialogFragment().show(getSupportFragmentManager(), TAG_ADD_SUPPLIER_DIALOG);
-					break;
-			}
-
-			fab.close(); // Close with animation
+			binding.mainFab.close(); // Close with animation
 			return true;
 		});
 	}
@@ -163,9 +128,9 @@ public class MainActivity extends SnackbarActivity implements LoaderManager.Load
 
 	private void displayCurrentState(final int state) {
 		if (state == RxBus.STATE_IN_PROGRESS)
-			progressBar.setVisibility(View.VISIBLE);
+			binding.mainProgressbar.setVisibility(View.VISIBLE);
 		else
-			progressBar.setVisibility(View.GONE);
+			binding.mainProgressbar.setVisibility(View.GONE);
 	}
 
 	@Override
@@ -185,14 +150,7 @@ public class MainActivity extends SnackbarActivity implements LoaderManager.Load
 		return super.onOptionsItemSelected(item);
 	}
 
-	@Override
-	protected void onDestroy() {
-		unbinder.unbind();
-		super.onDestroy();
-	}
-
 	/* Loader */
-
 	@NonNull
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
@@ -219,6 +177,6 @@ public class MainActivity extends SnackbarActivity implements LoaderManager.Load
 	@NonNull
 	@Override
 	public View getRootView() {
-		return root;
+		return binding.getRoot();
 	}
 }

@@ -13,10 +13,8 @@ import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import inc.ahmedmourad.inventorial.R;
+import inc.ahmedmourad.inventorial.databinding.DialogAddSupplierBinding;
 import inc.ahmedmourad.inventorial.defaults.DefaultTextWatcher;
 import inc.ahmedmourad.inventorial.model.database.InventorialDatabase;
 import inc.ahmedmourad.inventorial.model.pojo.Supplier;
@@ -27,21 +25,13 @@ import static android.content.DialogInterface.BUTTON_POSITIVE;
 
 public class AddSupplierDialogFragment extends DialogFragment {
 
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.new_supplier_name)
-	TextInputEditText nameEditText;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.new_supplier_phone_number)
-	TextInputEditText phoneNumberEditText;
-
 	private Button positiveButton;
 	private SnackbarActivity snackbarActivity;
 	private AlertDialog alertDialog;
 
 	private Context context;
 
-	private Unbinder unbinder;
+	private DialogAddSupplierBinding binding;
 
 	@NonNull
 	@Override
@@ -51,16 +41,16 @@ public class AddSupplierDialogFragment extends DialogFragment {
 
 		final View view = View.inflate(context, R.layout.dialog_add_supplier, null);
 
-		unbinder = ButterKnife.bind(this, view);
+		binding = DialogAddSupplierBinding.bind(view);
 
-		nameEditText.addTextChangedListener(new DefaultTextWatcher() {
+		binding.newSupplierName.addTextChangedListener(new DefaultTextWatcher() {
 			@Override
 			public void afterTextChanged(Editable s) {
 				validateSupplierInputs();
 			}
 		});
 
-		phoneNumberEditText.addTextChangedListener(new PhoneNumberFormattingTextWatcher() {
+		binding.newSupplierPhoneNumber.addTextChangedListener(new PhoneNumberFormattingTextWatcher() {
 			@Override
 			public void afterTextChanged(Editable s) {
 				super.afterTextChanged(s);
@@ -74,7 +64,7 @@ public class AddSupplierDialogFragment extends DialogFragment {
 
 			getPositiveButton().setOnClickListener(v -> {
 
-				if (!InventorialDatabase.getInstance().isSupplierNameValid(context, getSnackbarActivity().getRootView(), nameEditText.getText().toString().trim()))
+				if (!InventorialDatabase.getInstance().isSupplierNameValid(context, getSnackbarActivity().getRootView(), binding.newSupplierName.getText().toString().trim()))
 					return;
 
 				insertSupplier(context);
@@ -98,14 +88,14 @@ public class AddSupplierDialogFragment extends DialogFragment {
 	}
 
 	private boolean areSupplierInputsValid() {
-		return nameEditText.getText().toString().trim().length() > 0 &&
-				phoneNumberEditText.getText().toString().trim().length() > 0;
+		return binding.newSupplierName.getText().toString().trim().length() > 0 &&
+				binding.newSupplierPhoneNumber.getText().toString().trim().length() > 0;
 	}
 
 	private void insertSupplier(@NonNull final Context context) {
 
-		final Supplier supplier = Supplier.of(nameEditText.getText().toString().trim(),
-				phoneNumberEditText.getText().toString().trim()
+		final Supplier supplier = Supplier.of(binding.newSupplierName.getText().toString().trim(),
+				binding.newSupplierPhoneNumber.getText().toString().trim()
 		);
 
 		DatabaseService.startActionInsertSupplier(context, supplier);
@@ -142,7 +132,7 @@ public class AddSupplierDialogFragment extends DialogFragment {
 
 	@Override
 	public void onDestroyView() {
-		unbinder.unbind();
+		binding = null;
 		super.onDestroyView();
 	}
 }

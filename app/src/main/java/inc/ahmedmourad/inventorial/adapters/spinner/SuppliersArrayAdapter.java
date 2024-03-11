@@ -12,9 +12,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import inc.ahmedmourad.inventorial.R;
+import inc.ahmedmourad.inventorial.databinding.ItemSpinnerSupplierBinding;
+import inc.ahmedmourad.inventorial.databinding.ItemSpinnerSupplierDefaultBinding;
 import inc.ahmedmourad.inventorial.model.pojo.Supplier;
 
 public class SuppliersArrayAdapter extends BaseAdapter {
@@ -120,7 +120,7 @@ public class SuppliersArrayAdapter extends BaseAdapter {
 	static abstract class ViewHolder<T> {
 
 		private ViewHolder(@NonNull final View view) {
-			ButterKnife.bind(this, view);
+
 		}
 
 		@SuppressWarnings("unused")
@@ -133,14 +133,11 @@ public class SuppliersArrayAdapter extends BaseAdapter {
 
 		static final int TYPE_SUPPLIER = 1;
 
-		@BindView(R.id.spinner_supplier_text)
-		TextView nameTextView;
-
-		@BindView(R.id.spinner_supplier_phone_number)
-		TextView phoneNumberTextView;
+		ItemSpinnerSupplierBinding binding;
 
 		private SupplierViewHolder(@NonNull final View view) {
 			super(view);
+			binding = ItemSpinnerSupplierBinding.bind(view);
 		}
 
 		static boolean isInstance(@NonNull final Object o) {
@@ -153,8 +150,8 @@ public class SuppliersArrayAdapter extends BaseAdapter {
 			if (supplier == null)
 				return;
 
-			nameTextView.setText(supplier.getName());
-			phoneNumberTextView.setText(supplier.getPhoneNumber());
+			binding.spinnerSupplierText.setText(supplier.getName());
+			binding.spinnerSupplierPhoneNumber.setText(supplier.getPhoneNumber());
 		}
 
 		@Override
@@ -167,11 +164,11 @@ public class SuppliersArrayAdapter extends BaseAdapter {
 
 		static final int TYPE_DEFAULT = 0;
 
-		@BindView(R.id.spinner_supplier_text)
-		TextView textView;
+		ItemSpinnerSupplierDefaultBinding binding;
 
 		private DefaultViewHolder(@NonNull final View view) {
 			super(view);
+			binding = ItemSpinnerSupplierDefaultBinding.bind(view);
 		}
 
 		static boolean isInstance(@NonNull final Object o) {
@@ -181,9 +178,9 @@ public class SuppliersArrayAdapter extends BaseAdapter {
 		@Override
 		void bind(@NonNull final Integer itemsCount) {
 			if (itemsCount > 1)
-				textView.setText(R.string.no_supplier_selected);
+				binding.spinnerSupplierText.setText(R.string.no_supplier_selected);
 			else
-				textView.setText(R.string.no_suppliers_found);
+				binding.spinnerSupplierText.setText(R.string.no_suppliers_found);
 		}
 
 		@Override

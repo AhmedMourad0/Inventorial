@@ -8,29 +8,21 @@ import android.os.Bundle;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.luseen.spacenavigation.SpaceItem;
-import com.luseen.spacenavigation.SpaceNavigationView;
 
 import org.parceler.Parcels;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import inc.ahmedmourad.inventorial.R;
 import inc.ahmedmourad.inventorial.bus.RxBus;
+import inc.ahmedmourad.inventorial.databinding.ActivityDetailsBinding;
 import inc.ahmedmourad.inventorial.defaults.DefaultSpaceOnClickListener;
 import inc.ahmedmourad.inventorial.defaults.DefaultSpaceOnLongClickListener;
 import inc.ahmedmourad.inventorial.model.database.InventorialDatabase;
@@ -43,7 +35,6 @@ import inc.ahmedmourad.inventorial.utils.StringUtils;
 import inc.ahmedmourad.inventorial.view.activities.base.BaseActivity;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 public class DetailsActivity extends BaseActivity implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -54,58 +45,6 @@ public class DetailsActivity extends BaseActivity implements View.OnClickListene
 	static final String KEY_PAIR = "d_pair";
 	static final String KEY_PAIR_CAN_VIEW_SUPPLIER_PRODUCTS = "d_can_view_supplier_products";
 
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.details_toolbar)
-	Toolbar toolbar;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.details_collapsing_toolbar)
-	CollapsingToolbarLayout collapsingToolbar;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.details_progressbar)
-	MaterialProgressBar progressBar;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.details_product_image)
-	ImageView productImageView;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.details_product_price)
-	TextView productPriceTextView;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.details_product_quantity)
-	TextView productQuantityTextView;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.details_supplier_name)
-	TextView supplierNameTextView;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.details_supplier_phone_number)
-	TextView supplierPhoneNumberTextView;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.details_supplier_products_divider)
-	View supplierProductsDivider;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.details_supplier_label)
-	View supplierLabel;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.details_supplier_card)
-	View supplierCard;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.details_supplier_products)
-	Button supplierProductsButton;
-
-	@SuppressWarnings("WeakerAccess")
-	@BindView(R.id.details_space)
-	SpaceNavigationView spaceView;
-
 	@Nullable
 	private ProductSupplierPair pair;
 
@@ -113,19 +52,19 @@ public class DetailsActivity extends BaseActivity implements View.OnClickListene
 
 	private Disposable disposable;
 
-	private Unbinder unbinder;
+	private ActivityDetailsBinding binding;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_details);
 
-		unbinder = ButterKnife.bind(this);
+		binding = ActivityDetailsBinding.inflate(getLayoutInflater());
+		setContentView(binding.getRoot());
 
-		collapsingToolbar.setCollapsedTitleTextColor(ContextCompat.getColor(this, android.R.color.black));
+		binding.detailsCollapsingToolbar.setCollapsedTitleTextColor(ContextCompat.getColor(this, android.R.color.black));
 
-		setSupportActionBar(toolbar);
-		displayUpButton(toolbar);
+		setSupportActionBar(binding.detailsToolbar);
+		displayUpButton(binding.detailsToolbar);
 
 		final Intent intent = getIntent();
 
@@ -148,15 +87,15 @@ public class DetailsActivity extends BaseActivity implements View.OnClickListene
 
 			// Preventing inception
 			if (intent.getBooleanExtra(KEY_PAIR_CAN_VIEW_SUPPLIER_PRODUCTS, true)) {
-				supplierProductsButton.setVisibility(View.VISIBLE);
-				supplierProductsDivider.setVisibility(View.VISIBLE);
+				binding.detailsSupplierProducts.setVisibility(View.VISIBLE);
+				binding.detailsSupplierProductsDivider.setVisibility(View.VISIBLE);
 			} else {
-				supplierProductsButton.setVisibility(View.GONE);
-				supplierProductsDivider.setVisibility(View.GONE);
+				binding.detailsSupplierProducts.setVisibility(View.GONE);
+				binding.detailsSupplierProductsDivider.setVisibility(View.GONE);
 			}
 		}
 
-		supplierProductsButton.setOnClickListener(this);
+		binding.detailsSupplierProducts.setOnClickListener(this);
 
 		initializeSpaceView();
 		populateUi(true);
@@ -169,15 +108,15 @@ public class DetailsActivity extends BaseActivity implements View.OnClickListene
 		if (pair == null)
 			return;
 
-		collapsingToolbar.setTitle(pair.getProduct().getName());
+		binding.detailsCollapsingToolbar.setTitle(pair.getProduct().getName());
 
 		if (pair.getProduct().getQuantity() < 0)
 			pair.getProduct().setQuantity(0);
 
-		productPriceTextView.setText(getString(R.string.details_price, StringUtils.toString(pair.getProduct().getPrice())));
+		binding.detailsProductPrice.setText(getString(R.string.details_price, StringUtils.toString(pair.getProduct().getPrice())));
 
 		if (loadImage)
-			FileUtils.loadImageFromStorage(this, pair.getProduct().getName(), productImageView);
+			FileUtils.loadImageFromStorage(this, pair.getProduct().getName(), binding.detailsProductImage);
 
 		displayQuantity();
 
@@ -188,8 +127,8 @@ public class DetailsActivity extends BaseActivity implements View.OnClickListene
 
 			setSupplierVisible(true);
 
-			supplierNameTextView.setText(pair.getSupplier().getName());
-			supplierPhoneNumberTextView.setText(pair.getSupplier().getPhoneNumber());
+			binding.detailsSupplierName.setText(pair.getSupplier().getName());
+			binding.detailsSupplierPhoneNumber.setText(pair.getSupplier().getPhoneNumber());
 
 		} else {
 			setSupplierVisible(false);
@@ -198,34 +137,34 @@ public class DetailsActivity extends BaseActivity implements View.OnClickListene
 
 	private void setSupplierVisible(final boolean visible) {
 		if (visible) {
-			supplierLabel.setVisibility(View.VISIBLE);
-			supplierCard.setVisibility(View.VISIBLE);
+			binding.detailsSupplierLabel.setVisibility(View.VISIBLE);
+			binding.detailsSupplierCard.setVisibility(View.VISIBLE);
 		} else {
-			supplierLabel.setVisibility(View.GONE);
-			supplierCard.setVisibility(View.GONE);
+			binding.detailsSupplierLabel.setVisibility(View.GONE);
+			binding.detailsSupplierCard.setVisibility(View.GONE);
 		}
 	}
 
 	private void displayQuantity() {
 		if (pair != null)
-			productQuantityTextView.setText(getString(R.string.details_quantity, StringUtils.toString(pair.getProduct().getQuantity())));
+			binding.detailsProductQuantity.setText(getString(R.string.details_quantity, StringUtils.toString(pair.getProduct().getQuantity())));
 	}
 
 	private void initializeSpaceView() {
 
-		spaceView.setCentreButtonIcon(R.drawable.ic_edit);
-		spaceView.setCentreButtonColor(ContextCompat.getColor(this, R.color.colorSpaceCenter));
-		spaceView.setInActiveSpaceItemColor(Color.WHITE);
-		spaceView.setActiveSpaceItemColor(Color.WHITE);
-		spaceView.setInActiveCentreButtonIconColor(Color.BLACK);
-		spaceView.setActiveCentreButtonIconColor(Color.BLACK);
-		spaceView.setSpaceBackgroundColor(ContextCompat.getColor(this, R.color.colorSpaceBackground));
-		spaceView.setSpaceItemTextSize(getResources().getDimensionPixelSize(R.dimen.space_text_size));
+		binding.detailsSpace.setCentreButtonIcon(R.drawable.ic_edit);
+		binding.detailsSpace.setCentreButtonColor(ContextCompat.getColor(this, R.color.colorSpaceCenter));
+		binding.detailsSpace.setInActiveSpaceItemColor(Color.WHITE);
+		binding.detailsSpace.setActiveSpaceItemColor(Color.WHITE);
+		binding.detailsSpace.setInActiveCentreButtonIconColor(Color.BLACK);
+		binding.detailsSpace.setActiveCentreButtonIconColor(Color.BLACK);
+		binding.detailsSpace.setSpaceBackgroundColor(ContextCompat.getColor(this, R.color.colorSpaceBackground));
+		binding.detailsSpace.setSpaceItemTextSize(getResources().getDimensionPixelSize(R.dimen.space_text_size));
 
-		spaceView.addSpaceItem(new SpaceItem(getString(R.string.decrement), R.drawable.ic_down));
-		spaceView.addSpaceItem(new SpaceItem(getString(R.string.increment), R.drawable.ic_up));
+		binding.detailsSpace.addSpaceItem(new SpaceItem(getString(R.string.decrement), R.drawable.ic_down));
+		binding.detailsSpace.addSpaceItem(new SpaceItem(getString(R.string.increment), R.drawable.ic_up));
 
-		spaceView.setSpaceOnClickListener(new DefaultSpaceOnClickListener() {
+		binding.detailsSpace.setSpaceOnClickListener(new DefaultSpaceOnClickListener() {
 			@Override
 			public void onCentreButtonClick() {
 				final Intent intent = new Intent(DetailsActivity.this, AddProductActivity.class);
@@ -253,11 +192,11 @@ public class DetailsActivity extends BaseActivity implements View.OnClickListene
 					decreaseQuantity(1);
 				}
 
-				spaceView.changeCurrentItem(-1);
+				binding.detailsSpace.changeCurrentItem(-1);
 			}
 		});
 
-		spaceView.setSpaceOnLongClickListener(new DefaultSpaceOnLongClickListener() {
+		binding.detailsSpace.setSpaceOnLongClickListener(new DefaultSpaceOnLongClickListener() {
 			@Override
 			public void onItemLongClick(int itemIndex, String itemName) {
 
@@ -362,14 +301,14 @@ public class DetailsActivity extends BaseActivity implements View.OnClickListene
 
 		if (state == RxBus.STATE_IN_PROGRESS) {
 
-			progressBar.setVisibility(View.VISIBLE);
+			binding.detailsProgressbar.setVisibility(View.VISIBLE);
 
 		} else {
 
-			progressBar.setVisibility(View.GONE);
+			binding.detailsProgressbar.setVisibility(View.GONE);
 
 			if (pair != null)
-				FileUtils.loadImageFromStorage(this, pair.getProduct().getName(), productImageView);
+				FileUtils.loadImageFromStorage(this, pair.getProduct().getName(), binding.detailsProductImage);
 		}
 	}
 
@@ -388,25 +327,17 @@ public class DetailsActivity extends BaseActivity implements View.OnClickListene
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
-		switch (item.getItemId()) {
-
-			case R.id.details_action_delete:
-				deleteProduct();
-				return true;
-
-			case R.id.details_action_order:
-				if (pair != null)
-					callNumber(pair.getSupplier().getPhoneNumber());
-				return true;
-		}
+        int itemId = item.getItemId();
+        if (itemId == R.id.details_action_delete) {
+            deleteProduct();
+            return true;
+        } else if (itemId == R.id.details_action_order) {
+            if (pair != null)
+                callNumber(pair.getSupplier().getPhoneNumber());
+            return true;
+        }
 
 		return super.onOptionsItemSelected(item);
-	}
-
-	@Override
-	protected void onDestroy() {
-		unbinder.unbind();
-		super.onDestroy();
 	}
 
 	@Override

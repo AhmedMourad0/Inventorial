@@ -12,9 +12,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import inc.ahmedmourad.inventorial.R;
+import inc.ahmedmourad.inventorial.databinding.ItemProductBinding;
 import inc.ahmedmourad.inventorial.model.database.InventorialDatabase;
 import inc.ahmedmourad.inventorial.model.pojo.ProductSupplierPair;
 import inc.ahmedmourad.inventorial.utils.DialogUtils;
@@ -50,23 +49,7 @@ public class ProductsCursorAdapter extends CursorAdapter {
 
 	class ViewHolder {
 
-		@BindView(R.id.product_image)
-		ImageView imageView;
-
-		@BindView(R.id.product_name)
-		TextView nameTextView;
-
-		@BindView(R.id.product_price)
-		TextView priceTextView;
-
-		@BindView(R.id.product_quantity)
-		TextView quantityTextView;
-
-		@BindView(R.id.product_increment)
-		ImageButton incrementButton;
-
-		@BindView(R.id.product_decrement)
-		ImageButton decrementButton;
+		ItemProductBinding binding;
 
 		private final View view;
 		private final Context context;
@@ -74,24 +57,24 @@ public class ProductsCursorAdapter extends CursorAdapter {
 		private ViewHolder(@NonNull final View view) {
 			this.view = view;
 			this.context = view.getContext();
-			ButterKnife.bind(this, view);
+			binding = ItemProductBinding.bind(view);
 		}
 
 		private void bind(@NonNull final ProductSupplierPair pair, final int position) {
 
-			FileUtils.loadImageFromStorage(context, pair.getProduct().getName(), imageView);
-			nameTextView.setText(pair.getProduct().getName());
-			priceTextView.setText(StringUtils.toString(pair.getProduct().getPrice()));
+			FileUtils.loadImageFromStorage(context, pair.getProduct().getName(), binding.productImage);
+			binding.productName.setText(pair.getProduct().getName());
+			binding.productPrice.setText(StringUtils.toString(pair.getProduct().getPrice()));
 
 			if (pair.getProduct().getQuantity() < 0)
 				pair.getProduct().setQuantity(0);
 
 			displayQuantity(pair.getProduct().getQuantity());
 
-			incrementButton.setOnClickListener(v -> increaseQuantity(pair, 1));
-			decrementButton.setOnClickListener(v -> decreaseQuantity(pair, 1));
+			binding.productIncrement.setOnClickListener(v -> increaseQuantity(pair, 1));
+			binding.productDecrement.setOnClickListener(v -> decreaseQuantity(pair, 1));
 
-			incrementButton.setOnLongClickListener(v -> {
+			binding.productIncrement.setOnLongClickListener(v -> {
 
 				DialogUtils.showNumberPickerDialog(context,
 						context.getString(R.string.increase_quantity_by, pair.getProduct().getName()),
@@ -103,7 +86,7 @@ public class ProductsCursorAdapter extends CursorAdapter {
 				return true;
 			});
 
-			decrementButton.setOnLongClickListener(v -> {
+			binding.productDecrement.setOnLongClickListener(v -> {
 
 				DialogUtils.showNumberPickerDialog(context,
 						context.getString(R.string.decrease_quantity_by, pair.getProduct().getName()),
@@ -120,12 +103,12 @@ public class ProductsCursorAdapter extends CursorAdapter {
 
 		private void displayQuantity(final double quantity) {
 			setDecrementButtonEnabled(quantity >= 1);
-			quantityTextView.setText(StringUtils.toString(quantity));
+			binding.productQuantity.setText(StringUtils.toString(quantity));
 		}
 
 		private void setDecrementButtonEnabled(final boolean enabled) {
-			decrementButton.setEnabled(enabled);
-			decrementButton.setAlpha(enabled ? 1f : 0.3f);
+			binding.productDecrement.setEnabled(enabled);
+			binding.productDecrement.setAlpha(enabled ? 1f : 0.3f);
 		}
 
 		private void increaseQuantity(@NonNull final ProductSupplierPair pair, @IntRange(from = 1, to = Integer.MAX_VALUE) final int value) {
